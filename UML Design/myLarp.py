@@ -33,10 +33,10 @@ class MissionType(Enum):
     RESCUE = "Rescue" # Appropriate vehicle, available personnel, and communication capability.
 
 class EmergencyType(Enum):
-    OXYGEN_LEAK = "Oxygen Leak" # Suitable vehicle, required scientific skill, sufficient battery, and required equipment.
-    FIRE = "Fire" # Engineer, repair robot, and spare parts.
-    ROVER_BREAKDOWN = "Rover Breakdown" # Scientists with a particular skill,laboratory, scientific equipment, and sufficient resources.
-    MEDICAL_EMERGENCY = "Medical Emergency" # Appropriate vehicle, available personnel, and communication capability.
+    OXYGEN_LEAK = "Oxygen Leak"
+    FIRE = "Fire"
+    ROVER_BREAKDOWN = "Rover Breakdown"
+    MEDICAL_EMERGENCY = "Medical Emergency"
 
 ################################
 
@@ -56,6 +56,9 @@ class Colony:
     # Monitor Total Resources
     # Print Reports
     # Print Enviroment
+    
+    # submit Mission
+    # print Mission and Emergency outcomes
 
     def advanceTime(self, time_units:int) -> None:
         pass
@@ -71,6 +74,12 @@ class Agent: # Human / Robot
     # • Availability
     # • Health status
     pass
+
+    def canPerform(self, missionType:MissionType):
+        pass
+
+    def canHandle(self, emergencyType:EmergencyType):
+        pass
 
 class Human(Agent):
     # • Name
@@ -110,7 +119,7 @@ class Facility:
 
 class Habitat(Facility):
     pass
-class Laboratories(Facility):
+class Laboratory(Facility):
     pass
 class StorageFacility(Facility):
     pass
