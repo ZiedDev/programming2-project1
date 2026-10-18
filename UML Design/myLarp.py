@@ -58,7 +58,7 @@ class Colony:
     # Print Environment
     # Print Mission and Emergency outcomes
 
-    def _getResource(self, resourceType:ResourceType, int amount):
+    def _getResource(self, resourceType:ResourceType,amount:int):
         pass
 
     def advanceTime(self, time_units:int) -> None:
@@ -217,7 +217,68 @@ class RescueMission(Mission):
         self.isCommunicationDependant=True
 
 class Emergency:
-    def __init__(self):
-        self.type:EmergencyType
-        self.status:EmergencyStatus
+    def __init__(self, emergencyType:EmergencyType, location:Facility | Literal["Mars Surface"]) -> None:
+        self.emergencyType:EmergencyType = emergencyType
+        self.location:Facility | Literal["Mars Surface"] = location
+        self.status:EmergencyStatus = EmergencyStatus.UNRESOLVED
         self.failureReason:str=""
+
+        self.requiredAgents:dict[type[Agent],int]
+        self.requiredResources:dict[ResourceType,int]
+        self.assignedResponders:list[Agent]
+
+class OxygenLeakEmergency(Emergency):
+    def __init__(self, 
+                 affectedHabitat:Habitat, 
+                 oxygenLoss:int,
+                 requiredEngineerCount:int=1,
+                 requiredRepairBotCount:int=1,
+                 requiredSparePartsCount:int=2):
+        super().__init__(EmergencyType.OXYGEN_LEAK, affectedHabitat)
+        self.affectedHabitat:Habitat = affectedHabitat
+        self.oxygenLoss:int = oxygenLoss
+
+        self.requiredAgents[Engineer] = requiredEngineerCount
+        self.requiredAgents[RepairRobot] = requiredRepairBotCount
+        self.requiredResources[ResourceType.SPARE_PARTS] = requiredSparePartsCount
+
+class FireEmergency(Emergency):
+    def __init__(self, 
+                 affectedFacility:Facility,
+                 requiredEngineerCount:int=1,
+                 requiredMedicalOfficerCount:int=1,
+                 requiredWaterCount:int=50,
+                 requiredMedicalSuppliesCount:int=10):
+        super().__init__(EmergencyType.FIRE, affectedFacility)
+        self.affectedFacility:Facility = affectedFacility
+
+        self.requiredAgents[Engineer] = requiredEngineerCount
+        self.requiredAgents[MedicalOfficer] = requiredMedicalOfficerCount
+        self.requiredResources[ResourceType.WATER] = requiredWaterCount
+        self.requiredResources[ResourceType.MEDICAL] = requiredMedicalSuppliesCount
+
+class RoverBreakdownEmergency(Emergency):
+    def __init__(self, 
+                 damagedRover:ExplorationRover,
+                 requiredEngineerCount:int=1,
+                 requiredRepairBotCount:int=1,
+                 requiredSparePartsCount:int=3):
+        super().__init__(EmergencyType.ROVER_BREAKDOWN, damagedRover.currentLocation)
+        self.damagedRover:ExplorationRover = damagedRover
+
+        self.requiredAgents[Engineer] = requiredEngineerCount
+        self.requiredAgents[RepairRobot] = requiredRepairBotCount
+        self.requiredResources[ResourceType.SPARE_PARTS] = requiredSparePartsCount
+
+class MedicalEmergency(Emergency):
+    def __init__(self, 
+                 patient:Human,
+                 treatmentFacility:Facility,
+                 requiredMedicalOfficerCount:int=1,
+                 requiredMedicalSuppliesCount:int=15):
+        super().__init__(EmergencyType.MEDICAL_EMERGENCY, treatmentFacility)
+        self.patient:Human = patient
+        self.treatmentFacility:Facility = treatmentFacility
+
+        self.requiredAgents[MedicalOfficer] = requiredMedicalOfficerCount
+        self.requiredResources[ResourceType.MEDICAL] = requiredMedicalSuppliesCount
