@@ -1,0 +1,70 @@
+@startuml MARS_OPS_Object_Diagram
+skinparam objectAttributeIconSize 0
+skinparam monochrome false
+
+title MARS-OPS Object Diagram (Pre-Exploration Mission Snapshot)
+
+object "aresColony : Colony" as colony {
+    environment = NORMAL
+    activeMission = chryseSurvey
+}
+
+object "printMgr : PrintManager" as pm {
+}
+
+object "alphaHabitat : Habitat" as hab {
+    location = "Sector 1"
+    capacity = 10
+    isOperational = true
+    resources = {OXYGEN: 200, SPARE_PARTS: 5}
+}
+
+object "mainDepot : StorageFacility" as storage {
+    location = "Sector 2"
+    capacity = 100
+    isOperational = true
+    resources = {OXYGEN: 300, BATTERY: 50, SPARE_PARTS: 10}
+}
+
+object "drAlice : Scientist" as alice {
+    name = "Dr. Alice"
+    id = "S-101"
+    currentLocation = "Sector 1"
+    isAvailable = false
+    health = 100
+    fatigue = 0
+    skills = ["Geology", "Astrobiology"]
+}
+
+object "curiosity2 : ExplorationRover" as rover {
+    name = "Curiosity-2"
+    id = "R-01"
+    currentLocation = "Mars Surface - Chryse Planitia"
+    isAvailable = false
+    health = 100
+    batteryLevel = 80
+}
+
+object "chryseSurvey : ExplorationMission" as mission {
+    region = "Chryse Planitia"
+    duration = 2
+    elapsed = 0
+    isCommunicationDependent = false
+    status = ASSIGNED
+    failureReason = ""
+    requiredResources = {BATTERY: 10}
+}
+
+' --- LINKS ---
+colony *-- pm : owns
+colony o-- hab : contains
+colony o-- storage : contains
+colony o-- alice : manages
+colony o-- rover : manages
+
+colony --> mission : activeMission
+
+mission --> alice : assignedAgents
+mission --> rover : assignedAgents
+
+@enduml
