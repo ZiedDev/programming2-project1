@@ -1,7 +1,9 @@
 from enum import Enum, auto
+from types import Literal
 
-################################
+################################ enums
 
+type surfaceLocation = str
 class Environment(Enum):
     NORMAL = "Normal"
     DUST_STORM = "Dust Storm"
@@ -26,54 +28,57 @@ class ResourceType(Enum):
     MEDICAL = "Medical Supplies"
     SPARE_PARTS = "Spare Parts"
 
-class MissionType(Enum):
-    EXPLORATION = "Exploration" # Suitable vehicle, required scientific skill, sufficient battery, and required equipment.
-    REPAIR = "Repair" # Engineer, repair robot, and spare parts.
-    RESEARCH = "Research" # Scientists with a particular skill,laboratory, scientific equipment, and sufficient resources.
-    RESCUE = "Rescue" # Appropriate vehicle, available personnel, and communication capability.
-
 class EmergencyType(Enum):
     OXYGEN_LEAK = "Oxygen Leak"
     FIRE = "Fire"
     ROVER_BREAKDOWN = "Rover Breakdown"
     MEDICAL_EMERGENCY = "Medical Emergency"
 
-################################
+class Equipment:
+    def __init__(self):
+        self.isDamaged:bool=True
+
+################################ Colony singletpn
 
 class Colony:
-    def __init__(self) -> None:
-        self.facilities:list[Facility]
-        self.agents:list[Agent]
-        self.enviroment:Environment
-        self.activeMission:Mission
+    def __init__(self,facilities:list[Facility],agents:list[Agent]) -> None:
+        self.facilities:list[Facility]=facilities
+        self.agents:list[Agent]=agents
+        self.environment:Environment=Environment.NORMAL
+        self.activeMission:Mission|None=None
 
-        self.pastMissions:list[Mission]
-        self.pastEmergency:list[Emergency]
-        pass
+        self.pastMissions:list[Mission]=[]
+        self.pastEmergency:list[Emergency]=[]
 
     # Manage Agents
     # Manage Facilities
-    # Monitor Total Resources
+
+    # Print Total Resources
     # Print Reports
-    # Print Enviroment
-    
-    # submit Mission
-    # print Mission and Emergency outcomes
+    # Print Environment
+    # Print Mission and Emergency outcomes
+
+    def _getResource(self, resourceType:ResourceType, int amount):
+        pass
 
     def advanceTime(self, time_units:int) -> None:
         pass
 
-    def handleEmergency(self, emergencyType:EmergencyType) -> Emergency:
+    def submitMission(self, mission:Mission)-> None:
+        pass
+
+    def handleEmergency(self, emergency:Emergency) -> None:
         pass
 
 
-################################
+################################ agents
 
 class Agent: # Human / Robot
-    # • Current location
-    # • Availability
-    # • Health status
-    pass
+    def __init__(self,originLocation:Facility):
+        self.originLocation:Facility=originLocation
+        self.currentLocation:Facility | Literal["Mars Surface"]=originLocation
+        self.isAvailable:bool=True
+        self.Health:int=100
 
     def canPerform(self, missionType:MissionType):
         pass
@@ -82,11 +87,12 @@ class Agent: # Human / Robot
         pass
 
 class Human(Agent):
-    # • Name
-    # • Identification number
-    # • Skills
-    # • Fatigue level
-    pass
+    def __init__(self, originLocation:Facility, name:str,ID:str):
+        super().__init__(originLocation)
+
+        self.name:str=name
+        self.ID:str=ID
+        self.fatigue:int=0
 
 # Humans
 class Scientist(Human): # Performs scientific research missions
@@ -97,8 +103,10 @@ class MedicalOfficer(Human): # Responds to medical emergencies
     pass
 
 class RobotUnit(Agent):
-    # • Battery level
-    pass
+    def __init__(self, originLocation:Facility):
+        super().__init__(originLocation)
+
+        self.batteryLevel:int=100
 
 class ExplorationRover(RobotUnit): # Travels across the Martian surface, carries equipment, and performs exploration.
     pass
@@ -107,15 +115,19 @@ class RepairRobot(RobotUnit): # Repairs damaged equipment and operates inside fa
 class Drone (RobotUnit): # Performs aerial reconnaissance and operates in areas inaccessible to ground vehicles.
     pass
 
-################################
+################################ facilites
 
 class Facility:
-    # • A location
-    # • Capacity
-    # • Operational status
-    # • Resources
-    # • Equipment
-    pass
+    def __init__(self, 
+                 location:surfaceLocation,
+                 capacity:int,
+                 resources:dict[ResourceType,int],
+                 equipment:list[Equipment]):
+        self.location:surfaceLocation=location
+        self.capacity:int=capacity
+        self.isAvailable:bool=True
+        self.resources:dict[ResourceType,int]=resources
+        self.equipment:list[Equipment]=equipment
 
 class Habitat(Facility):
     pass
@@ -128,18 +140,84 @@ class PowerStation(Facility):
 class CommunicationStation(Facility):
     pass
 
-################################
-
+################################ Structs
 class Mission:
-    # - status: ASSIGNED, IN_PROGRESS, COMPLETED, FAILED
-    # - duration
-    # - failure reason
-    # - Communication-dependent
-    # - type
-    pass
+    def __init__(self, duration:int) -> None:
+        self.duration:int=duration
+        self.isCommunicationDependant:bool=False
+        
+        self.requiredAgents:dict[type[Agent],int]
+        self.requiredResources:dict[ResourceType,int]
+        self.requiredEquipment:int
+
+        self.status:MissionStatus
+        self.failureReason:str=""
+
+        self.agents:list[Agent]
+
+class ExplorationMission(Mission):
+    def __init__(self, 
+                 duration:int,
+                 region:str,
+                 requiredRoverCount:int,
+                 requiredScientistCount:int,
+                 requiredBatteryCount:int,
+                 requiredEquipmentCount:int):
+        super().__init__(duration)
+        self.region:str=region
+
+        self.requiredAgents[ExplorationRover]=requiredRoverCount
+        self.requiredAgents[Scientist]=requiredScientistCount
+        self.requiredEquipment[ResourceType.BATTERY]=requiredBatteryCount
+        self.requiredEquipment=requiredEquipmentCount
+class RepairMission(Mission):
+    def __init__(self,
+                 duration: int,
+                 damagedObject:Facility|Equipment,
+                 requiredEngineerCount:int,
+                 requiredRepairBotCount:int,
+                 requiredSparePartsCount:int):
+        super().__init__(duration)
+        self.damagedObject=damagedObject
+
+        self.requiredAgents[Engineer]=requiredEngineerCount
+        self.requiredAgents[RepairRobot]=requiredRepairBotCount
+        self.requiredEquipment[ResourceType.SPARE_PARTS]=requiredSparePartsCount
+        self.requiredEquipment=0
+class ResearchMission(Mission):
+    def __init__(self, 
+                 duration:int,
+                 researchedLab:Laboratory,
+                 requiredScientistCount:int,
+                 requiredEquipmentCount:int,
+                 requiredBatteryCount:int,
+                 requiredSparePartsCount:int):
+        super().__init__(duration)
+        self.researchedLab=researchedLab
+
+        self.requiredAgents[Scientist]=requiredScientistCount
+        self.requiredResources[ResourceType.BATTERY]=requiredBatteryCount
+        self.requiredResources[ResourceType.SPARE_PARTS]=requiredSparePartsCount
+        self.requiredEquipment=requiredEquipmentCount
+class RescueMission(Mission):
+    def __init__(self, 
+                 duration:int,
+                 requiredRoverCount:int,
+                 requiredMedicalOfficerCount:int,
+                 requiredMedicalSuppliesCount:int,
+                 requiredFuelCount:int):
+        super().__init__(duration)
+
+        self.requiredAgents[ExplorationRover]=requiredRoverCount
+        self.requiredAgents[MedicalOfficer]=requiredMedicalOfficerCount
+        self.requiredResources[ResourceType.MEDICAL]=requiredMedicalSuppliesCount
+        self.requiredResources[ResourceType.FUEL]=requiredFuelCount
+        self.requiredEquipment=0
+
+        self.isCommunicationDependant=True
 
 class Emergency:
-    # - type
-    # - status: UNRESOLVED
-    # - reason
-    pass
+    def __init__(self):
+        self.type:EmergencyType
+        self.status:EmergencyStatus
+        self.failureReason:str=""
