@@ -10,6 +10,7 @@ import marsops.resource.ResourceType;
 public abstract class Mission {
     protected int duration;
     protected int elapsed;
+    protected int requiredEquipment;
     private boolean isCommunicationDependent;
     protected MissionStatus status;
     protected String failureReason;
@@ -97,10 +98,43 @@ public abstract class Mission {
         }
     }
 
+    public List<Agent> findValidAgents(List<Agent> pool) {
+        List<Agent> toBeAssigned = new ArrayList<>();
+        if (pool == null || pool.isEmpty()) {
+            this.failureReason = "No agents available in the colony.";
+            return null;
+        }
+        // For each required agent type & count (e.g., Scientist -> 1, ExplorationRover -> 1)
+        for (Map.Entry<Class<? extends Agent>, Integer> entry : this.requiredAgents.entrySet()) {
+            Class<? extends Agent> requiredType = entry.getKey();
+            int neededCount = entry.getValue();
+            int foundCount = 0;
+            for (Agent agent : pool) {
+                if (requiredType.isInstance(agent) && agent.isAvailable() && agent.canPerform(this) && !toBeAssigned.contains(agent)) {
+                    toBeAssigned.add(agent);
+                    foundCount++;
+                    if (foundCount == neededCount) {
+                        break;
+                    }
+                }
+            }
+            //agents not fit >:[
+            if (foundCount < neededCount) {
+                this.failureReason = "Agent does not possess the required capability or is unavailable.";
+                return null;
+            }
+        }
+        return toBeAssigned;
+    }
+
     //setters and getters
 
     public int getDuration() {
         return this.duration;
+    }
+
+    public int getEquipmentCount() {
+        return this.requiredEquipment;
     }
 
     public int getElapsed() {
@@ -134,11 +168,12 @@ public abstract class Mission {
     public List<Agent> getAssignedAgents() {
         return this.assignedAgents;
     }
-    
+
     public void addRequiredResource(ResourceType type, int amount) {
         if (amount > 0) {
             this.requiredResources.put(type, this.requiredResources.getOrDefault(type, 0) + amount);
         }
     }
+
 
 }

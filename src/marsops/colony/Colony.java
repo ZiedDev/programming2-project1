@@ -13,9 +13,9 @@ public class Colony {
     private Mission activeMission;
     private Environment environment;
     private List<Mission> pastMissions;
+    private List<Agent> agents;
 
-    public boolean submitMission(Mission mission, List<Agent> agents) {
-        agents=mission.getAssignedAgents();
+    public boolean submitMission(Mission mission) {
         //check if another mission is active
         if (this.activeMission != null) {
             rejectMission(mission, "Another mission is already active.");
@@ -31,19 +31,18 @@ public class Colony {
             rejectMission(mission, "Communication-dependent operations are not allowed during communication disruption.");
             return false;
         }
-        //check agent requirements
-        if (!mission.validateRequirements(agents)) {
-            // mission.validateRequirements() already set mission.failureReason
+        // pick valid agents
+        List<Agent> toBeAssigned = mission.findValidAgents(this.agents);// returns null if no valid agents found
+        if (toBeAssigned == null || !mission.validateRequirements(toBeAssigned)) {
             rejectMission(mission, mission.getFailureReason());
             return false;
         }
-        //check and consume colony-wide resources (all or nothing)
-        if (!consumeResources(mission.getRequiredResources())) {//returns true if consumption successful
+        if (!consumeResources(mission.getRequiredResources(), mission.getEquipmentCount())) {
             rejectMission(mission, "Insufficient colony resources to start the mission.");
             return false;
         }
         //valid mission yippie
-        mission.assignAgents(agents); //sets status = ASSIGNED and marks agents unavailable
+        mission.assignAgents(toBeAssigned); //sets status = ASSIGNED and marks agents unavailable
         this.activeMission = mission;
         return true;
     }
