@@ -2,6 +2,7 @@ package marsops.colony;
 
 import java.util.List;
 
+import marsops.agent.Agent;
 import marsops.mission.ExplorationMission;
 import marsops.mission.Mission;
 

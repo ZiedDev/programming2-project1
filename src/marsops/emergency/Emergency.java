@@ -3,6 +3,7 @@ package marsops.emergency;
 import java.util.List;
 import java.util.Map;
 
+import marsops.agent.Agent;
 import marsops.resource.ResourceType;
 
 public abstract class Emergency {

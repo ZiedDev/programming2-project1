@@ -7,7 +7,7 @@ import java.util.List;
 import marsops.resource.Equipment;
 import marsops.resource.ResourceType;
 
-public class Facility {
+public class Facility implements Location {
     private String location;
     private int capacity;
     private Map<ResourceType, Integer> resourceAmount;
@@ -16,7 +16,10 @@ public class Facility {
     private static int cnt = 0;
     private boolean isAvailable;
     private int totalTakenCapacity = 0;
-    protected ResourceType[] prioToAllocate = new ResourceType[7];
+    protected ResourceType[] prioToAllocate  = new ResourceType[7];
+    protected String name;
+    @Override
+    public String getName() { return name; }
 
     public Facility(String location, int capacity) {
         this.location = location;

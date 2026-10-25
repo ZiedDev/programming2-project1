@@ -38,7 +38,7 @@ class Equipment:
     def __init__(self):
         self.isDamaged:bool=True
 
-################################ Colony singletpn
+################################ Colony singleton
 
 class Colony:
     def __init__(self,facilities:list[Facility],agents:list[Agent]) -> None:
@@ -115,7 +115,7 @@ class RepairRobot(RobotUnit): # Repairs damaged equipment and operates inside fa
 class Drone (RobotUnit): # Performs aerial reconnaissance and operates in areas inaccessible to ground vehicles.
     pass
 
-################################ facilites
+################################ facilities
 
 class Facility:
     def __init__(self, 

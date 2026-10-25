@@ -3,6 +3,9 @@ package marsops.mission;
 import java.util.List;
 import java.util.Map;
 
+import marsops.agent.Agent;
+import marsops.agent.human.Scientist;
+import marsops.agent.robot.ExplorationRover;
 import marsops.resource.ResourceType;
 
 public class ExplorationMission extends Mission {
