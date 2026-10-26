@@ -23,11 +23,11 @@ public class Robot extends Agent {
     }
 
     public void reduce_batteryLevel(int time_unit) {
-        this.batteryLevel = Math.min(this.batteryLevel + time_unit, BATTERY_LEVEL_MAX);
+        this.batteryLevel = Math.max(this.batteryLevel - time_unit, BATTERY_LEVEL_MIN);
     }
 
     public void increase_batteryLevel(int time_unit) {
-        this.batteryLevel = Math.max(this.batteryLevel - time_unit, BATTERY_LEVEL_MIN);
+        this.batteryLevel = Math.min(this.batteryLevel + time_unit, BATTERY_LEVEL_MAX);
     }
 
     public void update_batteryLevel(int time_unit) {
