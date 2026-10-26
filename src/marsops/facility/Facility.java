@@ -7,22 +7,19 @@ import java.util.List;
 import marsops.resource.Equipment;
 import marsops.resource.ResourceType;
 
-public class Facility implements Location {
-    private String location;
+public class Facility extends Location {
     private int capacity;
     private Map<ResourceType, Integer> resourceAmount;
     private List<Equipment> equipmentList;
-    private int id;
+    private final int id;
     private static int cnt = 0;
     private boolean isAvailable;
     private int totalTakenCapacity = 0;
     protected ResourceType[] prioToAllocate  = new ResourceType[7];
-    protected String name;
-    @Override
-    public String getName() { return name; }
 
     public Facility(String location, int capacity) {
-        this.location = location;
+        super(location);
+
         this.capacity = capacity;
         this.id = ++cnt;
         this.isAvailable = true;
@@ -43,10 +40,6 @@ public class Facility implements Location {
 
     public void setAvailability(boolean state) {
         this.isAvailable = state;
-    }
-
-    public String getLocation() {
-        return this.location;
     }
 
     public int getCapacity() {
@@ -70,7 +63,7 @@ public class Facility implements Location {
     // return cnt;
     // }
     public int getTotalTakenCapacity() {
-        return totalTakenCapacity;
+            return totalTakenCapacity;
     }
 
     public boolean addEquipment() { // return true if successfully allocated

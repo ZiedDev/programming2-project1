@@ -1,6 +1,17 @@
 package marsops.facility;
 
-public interface Location {
-    String getName();
-    default boolean isSurface() { return false; }
+public class Location {
+    private final String location;
+
+    public Location(String location) {
+        this.location = location;
+    }
+
+    public String setLocation() {
+        return location;
+    }
+
+    public String getLocation() {
+        return location;
+    }
 }
