@@ -24,6 +24,7 @@ public abstract class Mission {
         this.isCommunicationDependent = false;
         this.status = null;
         this.failureReason = "";
+        this.requiredEquipment = 0;
         this.requiredResources = new HashMap<>();
         this.requiredAgents = new HashMap<>();
         this.assignedAgents = new ArrayList<>();
@@ -37,7 +38,7 @@ public abstract class Mission {
             return false;
         }
         for (Agent agent : agents) {
-            if (!agent.canPerform(this)) {
+            if (!agent.canPerform(this)) {//assumeing that it handles availability as well
                 this.failureReason = "Agent not available for mission.";
                 return false;
             }
