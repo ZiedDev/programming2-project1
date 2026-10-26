@@ -1,7 +1,7 @@
 package marsops.facility;
 
 public class Location {
-    private final String location;
+    protected final String location;
 
     public Location(String location) {
         this.location = location;
