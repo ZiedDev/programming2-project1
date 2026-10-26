@@ -1,10 +1,11 @@
 package marsops.mission;
 
 import java.util.List;
-import java.util.Map;
+import marsops.agent.Agent;
+import marsops.agent.human.Engineer;
+import marsops.agent.robot.RepairRobot;
 import marsops.facility.Facility;
 import marsops.resource.Equipment;
-
 import marsops.resource.ResourceType;
 
 public class RepairMission extends Mission {
@@ -54,8 +55,13 @@ public class RepairMission extends Mission {
         super.assignAgents(agents);
         if(this.damagedFacility!=null){
             for (Agent agent : this.assignedAgents) {
+                agent.setCurrentLocation(this.damagedFacility);
+            }
+        }
+        else if(this.damagedEquipment!=null){
+            for (Agent agent : this.assignedAgents) {
                 //agent.setCurrentLocation(this.damagedFacility);
-                //TODO: set new location according to Zied's implementation to location
+                //TODO: set location to same location as equipment (need to add location attribute to equipment)
             }
         }
     }

@@ -1,11 +1,10 @@
 package marsops.mission;
 
 import java.util.List;
-import java.util.Map;
-
 import marsops.agent.Agent;
 import marsops.agent.human.Scientist;
 import marsops.agent.robot.ExplorationRover;
+import marsops.facility.SurfaceLocation;
 import marsops.resource.ResourceType;
 
 public class ExplorationMission extends Mission {
@@ -33,8 +32,7 @@ public class ExplorationMission extends Mission {
     public void assignAgents(List<Agent> agents) {
         super.assignAgents(agents);
         for (Agent agent : this.assignedAgents) {
-            //agent.setCurrentLocation("Mars Surface - " + this.region);
-            //TODO: set new location according to Zied's implementation to location
+            agent.setCurrentLocation(new SurfaceLocation(region));
         }
     }
     public String getRegion() {
