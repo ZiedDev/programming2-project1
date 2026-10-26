@@ -51,6 +51,7 @@ public abstract class Mission {
         if (agents != null) {
             for (Agent agent : agents) {
                 agent.setAvailable(false);
+                agent.setAssignedMission(this);
                 this.assignedAgents.add(agent);
             }
         }
@@ -94,6 +95,7 @@ public abstract class Mission {
             for (Agent agent : this.assignedAgents) {
                 if (agent != null) {
                     agent.setAvailable(true);
+                    agent.setAssignedMission(null);
                 }
             }
         }
