@@ -38,7 +38,7 @@ public abstract class Mission {
             return false;
         }
         for (Agent agent : agents) {
-            if (!agent.canPerform(this)) {//assumeing that it handles availability as well
+            if (!agent.canPerform(this)) {//assuming that it handles availability as well
                 this.failureReason = "Agent not available for mission.";
                 return false;
             }
@@ -57,7 +57,7 @@ public abstract class Mission {
         this.status = MissionStatus.ASSIGNED;
     }
 
-    //time advancement according to state graph (i hope we make the graph </3)
+    //time advancement according to state graph (I hope we make the graph </3)
     public void tick(int timeUnits) {
         if (this.status == MissionStatus.COMPLETED || this.status == MissionStatus.FAILED || this.status == null) {
             return;

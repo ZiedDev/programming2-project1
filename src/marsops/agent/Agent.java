@@ -10,48 +10,63 @@ public class Agent {
     private Location currentLocation;
     private boolean isAvailable;
     private int health;
+    private Mission assignedMission;
 
     public Agent(Facility originLocation) {
         this.originLocation = originLocation;
         this.currentLocation = originLocation;
         this.isAvailable = true;
         this.health = 100;
-    }
-
-    // getters
-    public Facility getOriginLocation() {
-        return this.originLocation;
-    }
-    public Location getCurrentLocation() {
-        return this.currentLocation;
-    }
-    public boolean isAvailable() {
-        return this.isAvailable;
-    }
-    public int getHealth() {
-        return this.health;
+        this.assignedMission = null;
     }
 
     // setters
     public void setOriginLocation(Facility originLocation) {
         this.originLocation = originLocation;
     }
+
     public void setCurrentLocation(Location currentLocation) {
         this.currentLocation = currentLocation;
     }
+
     public void setAvailable(boolean available) {
         this.isAvailable = available;
     }
+
     public void setHealth(int health) {
         this.health = health;
     }
 
-    // funcs
+    public void setAssignedMission(Mission assignedMission) {
+        this.assignedMission = assignedMission;
+    }
+
+    // getters
+    public Facility getOriginLocation() {
+        return this.originLocation;
+    }
+
+    public Location getCurrentLocation() {
+        return this.currentLocation;
+    }
+
+    public boolean isAvailable() {
+        return this.isAvailable;
+    }
+
+    public int getHealth() {
+        return this.health;
+    }
+
+    public Mission getAssignedMission() {
+        return assignedMission;
+    }
+
     public boolean canPerform(Mission mission) {
-        return false;
+        return isAvailable;
     }
 
     public void canHandle(Emergency emergency) {
-
+        // awaiting emergencies help
     }
 }
