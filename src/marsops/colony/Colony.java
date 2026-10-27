@@ -24,7 +24,7 @@ public class Colony {
     public AgentManager agentManager;
     public FacilityManager facilityManager;
 
-    // NOTE: singleton?
+    // TODO: singleton?
     public Colony() {
         this.environment = Environment.NORMAL;
         this.activeMission = null;
@@ -115,7 +115,7 @@ public class Colony {
         this.pastEmergencies.add(emergency);
     }
 
-    // NOTE: why public method?
+    // TODO: why public method?
     public void addCompletedMission(Mission mission) {
         this.pastMissions.add(mission);
     }

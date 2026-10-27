@@ -36,7 +36,7 @@ public abstract class Mission {
         this.assignedAgents = new ArrayList<>();
     }
 
-    // NOTE: abstract as this is extremely unreadable cuz i failed to see that it
+    // TODO: abstract as this is extremely unreadable cuz i failed to see that it
     // sets failureReason in the overrides
     public boolean validateRequirements() {
         return true;

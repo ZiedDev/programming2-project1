@@ -38,6 +38,10 @@ abstract public class Facility extends Location {
         prioToAllocate[6] = ResourceType.SPARE_PARTS;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public void setAvailability(boolean state) {
         this.isAvailable = state;
     }

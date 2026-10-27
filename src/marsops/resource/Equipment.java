@@ -10,7 +10,11 @@ public class Equipment {
 
     public Equipment() {
         this.isDamaged = false;
-        id = ++this.cnt;
+        id = ++cnt;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public boolean isAvailable() {

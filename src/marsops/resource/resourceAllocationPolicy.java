@@ -46,11 +46,11 @@ public class resourceAllocationPolicy {
         PRIORITY.put(ResourceType.BATTERY, batteryPrio);
 
         List<Class<? extends Facility>> medicalPrio = new ArrayList<>();
-        fuelPrio.add(StorageFacility.class);
-        fuelPrio.add(Laboratory.class);
-        fuelPrio.add(Habitat.class);
-        fuelPrio.add(PowerStation.class);
-        PRIORITY.put(ResourceType.MEDICAL, fuelPrio);
+        medicalPrio.add(StorageFacility.class);
+        medicalPrio.add(Laboratory.class);
+        medicalPrio.add(Habitat.class);
+        medicalPrio.add(PowerStation.class);
+        PRIORITY.put(ResourceType.MEDICAL, medicalPrio);
 
         List<Class<? extends Facility>> sparePartsPrio = new ArrayList<>();
         sparePartsPrio.add(StorageFacility.class);
