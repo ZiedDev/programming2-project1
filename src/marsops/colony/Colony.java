@@ -56,6 +56,7 @@ public class Colony {
         }
         //valid mission yippie
         mission.assignAgents(this.agentManager.provide(mission)); //sets status = ASSIGNED and marks agents unavailable
+        this.facilityManager.provide(mission);
         this.activeMission = mission;
         return true;
     }
@@ -72,7 +73,15 @@ public class Colony {
     public void advanceTime(int time_unit){
         this.agentManager.tick(time_unit);
         if(this.activeMission!=null){
-            this.activeMission.tick(time_unit);
+            if (this.environment == Environment.DUST_STORM && this.activeMission instanceof ExplorationMission) {
+                this.activeMission.fail("Mission failed due to a dust storm.");
+            }
+            else if (this.environment == Environment.COMM_DISRUPTION && this.activeMission.isCommunicationDependent()) {
+                this.activeMission.fail("Mission failed due to communication disruption.");
+            }
+            else {
+                this.activeMission.tick(time_unit);
+            }
             if(this.activeMission.getStatus()==MissionStatus.COMPLETED||this.activeMission.getStatus()==MissionStatus.FAILED){
                 addCompletedMission(this.activeMission);
                 this.agentManager.releaseAgents(this.activeMission.getAssignedAgents());
