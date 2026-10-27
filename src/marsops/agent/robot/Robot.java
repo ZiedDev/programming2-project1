@@ -22,29 +22,34 @@ public class Robot extends Agent {
         this.batteryLevel = batteryLevel;
     }
 
-    public void reduce_batteryLevel(int time_unit) {
+    public void reduceBatteryLevel(int time_unit) {
         this.batteryLevel = Math.max(this.batteryLevel - time_unit, BATTERY_LEVEL_MIN);
     }
 
-    public void increase_batteryLevel(int time_unit) {
+    public void increaseBatteryLevel(int time_unit) {
         this.batteryLevel = Math.min(this.batteryLevel + time_unit, BATTERY_LEVEL_MAX);
     }
 
-    public void update_batteryLevel(int time_unit) {
+    public void updateBatteryLevel(int time_unit) {
         if (this.getAssignedMission() != null) {
             int time_left = this.getAssignedMission().getDuration() - this.getAssignedMission().getElapsed();
-            reduce_batteryLevel(Math.min(time_left, time_unit));
+            reduceBatteryLevel(Math.min(time_left, time_unit));
 
             if (time_unit > time_left) {
-                increase_batteryLevel(time_unit - time_left);
+                increaseBatteryLevel(time_unit - time_left);
             }
         } else {
-            increase_batteryLevel(time_unit);
+            increaseBatteryLevel(time_unit);
         }
     }
     @Override
     public boolean canPerform(Mission mission) {
         if (!super.isAvailable()) return false;
         return (batteryLevel - mission.getDuration()) < BATTERY_LEVEL_MIN;
+    }
+
+    @Override
+    public void advanceTime(int time_unit) {
+        updateBatteryLevel(time_unit);
     }
 }

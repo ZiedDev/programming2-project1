@@ -5,7 +5,7 @@ import marsops.facility.Facility;
 import marsops.facility.Location;
 import marsops.mission.Mission;
 
-public class Agent {
+public abstract class Agent {
     private Facility originLocation;
     private Location currentLocation;
     private boolean isAvailable;
@@ -68,5 +68,9 @@ public class Agent {
 
     public void canHandle(Emergency emergency) {
         // awaiting emergencies help
+    }
+
+    public void advanceTime(int time_unit) {
+        return;
     }
 }

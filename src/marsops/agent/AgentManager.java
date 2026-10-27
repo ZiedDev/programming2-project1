@@ -139,4 +139,10 @@ public class AgentManager {
             agent.setCurrentLocation(location);
         }
     }
+
+    public void advanceTime(int time_unit) {
+        for(Agent agent: agents) {
+            agent.advanceTime(time_unit);
+        }
+    }
 }
