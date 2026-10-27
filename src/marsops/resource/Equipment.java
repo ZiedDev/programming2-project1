@@ -1,9 +1,12 @@
 package marsops.resource;
 
+import marsops.facility.Location;
+
 public class Equipment {
     private Boolean isDamaged;
     private static int cnt = 0;
     private int id;
+    private Location location;
 
     public Equipment() {
         this.isDamaged = false;
@@ -12,6 +15,14 @@ public class Equipment {
 
     public boolean isAvailable() {
         return isDamaged;
+    }
+
+    public Location getLocation(){
+        return this.location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public void fix() {

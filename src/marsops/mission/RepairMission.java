@@ -1,7 +1,5 @@
 package marsops.mission;
 
-import java.util.ArrayList;
-import marsops.agent.Agent;
 import marsops.agent.human.Engineer;
 import marsops.agent.robot.RepairRobot;
 import marsops.facility.Facility;
@@ -9,8 +7,8 @@ import marsops.resource.Equipment;
 import marsops.resource.ResourceType;
 
 public class RepairMission extends Mission {
-    private Facility damagedFacility;
-    private Equipment damagedEquipment;
+    private final Facility damagedFacility;
+    private final Equipment damagedEquipment;
 
     //gonna overload repair mission due to unknown repair target type: facility/equipment
     public RepairMission(int duration, Facility damagedFacility, int requiredEngineerCount, int requiredRepairBotCount, int requiredBatteryCount, int requiredSparePartsCount) {
