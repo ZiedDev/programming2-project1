@@ -23,6 +23,7 @@ public class Colony {
     // TODO: public -> private + delegates
     public AgentManager agentManager;
     public FacilityManager facilityManager;
+    private final PrintManager printManager;
 
     // TODO: singleton?
     public Colony() {
@@ -32,6 +33,7 @@ public class Colony {
         this.pastEmergencies = new ArrayList<>();
         this.agentManager = new AgentManager();
         this.facilityManager = new FacilityManager();
+        this.printManager = new PrintManager(this);
     }
 
     public boolean submitMission(Mission mission) {
