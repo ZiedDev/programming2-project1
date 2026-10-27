@@ -14,10 +14,10 @@ public class Equipment {
     }
 
     public boolean isAvailable() {
-        return isDamaged;
+        return !isDamaged;
     }
 
-    public Location getLocation(){
+    public Location getLocation() {
         return this.location;
     }
 

@@ -40,7 +40,7 @@ public class FacilityManager {
         Map<ResourceType, Integer> availableResources = getTotalResources();
         for (Map.Entry<ResourceType, Integer> entry : mission.getRequiredResources().entrySet()) {
             ResourceType resource = entry.getKey();
-            int available = availableResources.get(resource);
+            int available = availableResources.getOrDefault(resource,0);
             int required = entry.getValue();
             if (required > available) {
                 can = false;

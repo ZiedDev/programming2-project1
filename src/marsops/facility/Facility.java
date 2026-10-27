@@ -111,10 +111,14 @@ abstract public class Facility extends Location {
         for (ResourceType i : prioToAllocate) {
             if (totalTakenCapacity < capacity) {
                 int left = capacity - totalTakenCapacity;
-                int toPut = Math.min(left, resourcesToAllocate.get(i));
-                this.resourceAmount.put(i, resourceAmount.get(i) + toPut);
+                int toPut = Math.min(left, resourcesToAllocate.getOrDefault(i, 0));
+                this.resourceAmount.put(i, resourceAmount.getOrDefault(i, 0) + toPut);
                 totalTakenCapacity += toPut;
-                resourcesToAllocate.put(i, resourcesToAllocate.get(i) - toPut);
+                if (toPut > 0) {
+                    resourcesToAllocate.put(i, resourcesToAllocate.getOrDefault(i, 0) - toPut);
+                }
+            } else {
+                break;
             }
         }
         return resourcesToAllocate;
