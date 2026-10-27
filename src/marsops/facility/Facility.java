@@ -7,7 +7,7 @@ import java.util.List;
 import marsops.resource.Equipment;
 import marsops.resource.ResourceType;
 
-public class Facility extends Location {
+abstract public class Facility extends Location {
     private int capacity;
     private Map<ResourceType, Integer> resourceAmount;
     private List<Equipment> equipmentList;
@@ -15,7 +15,7 @@ public class Facility extends Location {
     private static int cnt = 0;
     private boolean isAvailable;
     private int totalTakenCapacity = 0;
-    protected ResourceType[] prioToAllocate  = new ResourceType[7];
+    protected ResourceType[] prioToAllocate = new ResourceType[7];
 
     public Facility(String location, int capacity) {
         super(location);
@@ -28,7 +28,7 @@ public class Facility extends Location {
         for (ResourceType i : ResourceType.values()) {
             this.resourceAmount.put(i, 0);
         }
-        //default prio
+        // default prio
         prioToAllocate[0] = ResourceType.OXYGEN;
         prioToAllocate[1] = ResourceType.WATER;
         prioToAllocate[2] = ResourceType.FOOD;
@@ -63,7 +63,7 @@ public class Facility extends Location {
     // return cnt;
     // }
     public int getTotalTakenCapacity() {
-            return totalTakenCapacity;
+        return totalTakenCapacity;
     }
 
     public boolean addEquipment() { // return true if successfully allocated
@@ -76,12 +76,25 @@ public class Facility extends Location {
         return false;
     }
 
+    public int deductEquipment(int amount) { // returns number of equipment that still need to be deducted
+        for (Equipment i : equipmentList) {
+            if (amount == 0) {
+                break;
+            }
+            if (i.isAvailable()) {
+                equipmentList.remove(i);
+                amount--;
+            }
+        }
+        return amount;
+    }
+
     public Map<ResourceType, Integer> addResources(Map<ResourceType, Integer> resourcesToAllocate) { // returns
                                                                                                      // un-allocated
                                                                                                      // resources
         for (ResourceType i : prioToAllocate) {
             if (totalTakenCapacity < capacity) {
-                int left = capacity-totalTakenCapacity;
+                int left = capacity - totalTakenCapacity;
                 int toPut = Math.min(left, resourcesToAllocate.get(i));
                 this.resourceAmount.put(i, resourceAmount.get(i) + toPut);
                 totalTakenCapacity += toPut;
@@ -90,11 +103,11 @@ public class Facility extends Location {
         }
         return resourcesToAllocate;
     }
-    int deductResource(int amount,ResourceType resource){ //returns undeducted amount
-        int toSubt = Math.min(this.resourceAmount.get(resource),amount);
-        this.resourceAmount.put(resource,this.resourceAmount.get(resource) - toSubt);
-        return amount-toSubt;
+
+    int deductResource(int amount, ResourceType resource) { // returns undeducted amount
+        int toSubt = Math.min(this.resourceAmount.get(resource), amount);
+        this.resourceAmount.put(resource, this.resourceAmount.get(resource) - toSubt);
+        return amount - toSubt;
     }
-    
 
 }
