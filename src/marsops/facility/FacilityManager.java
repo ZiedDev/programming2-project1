@@ -7,12 +7,18 @@ import java.util.HashMap;
 import java.util.Map;
 import marsops.mission.Mission;
 import marsops.resource.resourceAllocationPolicy;
+import marsops.emergency.Emergency;
 
 public class FacilityManager {
     private List<Facility> facilityList;
 
     public FacilityManager() {
         facilityList = new ArrayList<>();
+    }
+
+    public void addFacility(Facility x) {
+        facilityList.add(x);
+        return;
     }
 
     public Map<ResourceType, Integer> getTotalResources() {
@@ -36,25 +42,49 @@ public class FacilityManager {
     }
 
     public boolean canProvide(Mission mission) {
+        return canProvide(mission.getRequiredResources(), mission.getEquipmentCount());
+    }
+
+    public boolean canProvide(Emergency emergency) {
+        return canProvide(emergency.getRequiredResources(), 0);
+    }
+
+    private boolean canProvide(Map<ResourceType, Integer> requiredResources, int requiredEquipment) {
         boolean can = true;
         Map<ResourceType, Integer> availableResources = getTotalResources();
-        for (Map.Entry<ResourceType, Integer> entry : mission.getRequiredResources().entrySet()) {
+        for (Map.Entry<ResourceType, Integer> entry : requiredResources.entrySet()) {
             ResourceType resource = entry.getKey();
-            int available = availableResources.getOrDefault(resource,0);
+            int available = availableResources.getOrDefault(resource, 0);
             int required = entry.getValue();
             if (required > available) {
                 can = false;
             }
         }
-        if (mission.getEquipmentCount() > getTotalEquipment()) {
+        if (requiredEquipment > getTotalEquipment()) {
             can = false;
         }
         return can;
     }
 
+    public void provide(Emergency emergency) {
+        Map<ResourceType, Integer> requiredResources = emergency.getRequiredResources();
+        int requiredEquipment = 0; // does emergency really need no equipment ?
+        if (!canProvide(requiredResources, requiredEquipment)) {
+            return;
+        }
+        provide(requiredResources, requiredEquipment);
+    }
+
     public void provide(Mission mission) {
         Map<ResourceType, Integer> requiredResources = mission.getRequiredResources();
         int requiredEquipment = mission.getEquipmentCount();
+        if (!canProvide(requiredResources, requiredEquipment)) {
+            return;
+        }
+        provide(requiredResources, requiredEquipment);
+    }
+
+    private void provide(Map<ResourceType, Integer> requiredResources, int requiredEquipment) {
         for (Map.Entry<ResourceType, Integer> entry : requiredResources.entrySet()) { // deduct resources
             ResourceType resource = entry.getKey();
             int amount = entry.getValue();
