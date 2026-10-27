@@ -1,5 +1,40 @@
 package marsops.emergency;
 
-public class OxygenLeakEmergency {
-    
+import marsops.agent.human.Engineer;
+import marsops.agent.robot.RepairRobot;
+import marsops.facility.Habitat;
+import marsops.resource.ResourceType;
+
+public class OxygenLeakEmergency extends Emergency {
+    private final Habitat affectedHabitat;
+    private final int oxygenLoss;
+
+    public OxygenLeakEmergency(
+            Habitat affectedHabitat,
+            int oxygenLoss,
+            int requiredEngineerCount,
+            int requiredRepairBotCount,
+            int requiredSparePartsCount) {
+        super(affectedHabitat);
+        this.affectedHabitat = affectedHabitat;
+        this.oxygenLoss = oxygenLoss;
+
+        this.requiredAgents.put(Engineer.class, Math.max(1, requiredEngineerCount));
+        this.requiredAgents.put(RepairRobot.class, Math.max(1, requiredRepairBotCount));
+        this.addRequiredResource(ResourceType.SPARE_PARTS, requiredSparePartsCount);
+
+        applyOxygenLoss();
+    }
+
+    private void applyOxygenLoss() {
+        int currentOxygen = affectedHabitat.getResources().getOrDefault(ResourceType.OXYGEN, 0);
+        int deduction = Math.min(currentOxygen, oxygenLoss);
+        affectedHabitat.getResources().put(ResourceType.OXYGEN, currentOxygen - deduction);
+    }
+
+    @Override
+    public void fail(String reason) {
+        super.fail(reason);
+        applyOxygenLoss();
+    }
 }

@@ -36,6 +36,7 @@ public abstract class Mission {
         this.assignedAgents = new ArrayList<>();
     }
 
+    // NOTE: abstract
     public boolean validateRequirements(){
         return true;
     }
