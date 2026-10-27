@@ -1,5 +1,8 @@
 package marsops.agent;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import marsops.agent.human.Engineer;
 import marsops.agent.human.Human;
 import marsops.agent.human.MedicalOfficer;
@@ -11,10 +14,8 @@ import marsops.agent.robot.Robot;
 import marsops.facility.Facility;
 import marsops.facility.Location;
 import marsops.mission.Mission;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import marsops.mission.MissionStatus;
+import marsops.mission.RescueMission;
 
 public class AgentManager {
     private final ArrayList<Agent> agents;
@@ -127,6 +128,19 @@ public class AgentManager {
             agent.setAvailable(true);
             agent.setAssignedMission(null);
             relocate(agent, agent.getOriginLocation());
+        }
+        if(mission instanceof RescueMission){
+            rescue(mission);
+        }
+    }
+
+    public void rescue(Mission mission){
+        Agent rescued = mission.getTargetAgent();
+        if (mission.getStatus() == MissionStatus.COMPLETED && rescued != null) {
+            rescued.setHealth(100);
+            rescued.setAvailable(true);
+            rescued.setAssignedMission(null);
+            relocate(rescued, rescued.getOriginLocation());
         }
     }
 

@@ -18,6 +18,7 @@ public abstract class Mission {
     protected Map<Class<? extends Agent>, Integer> requiredAgents;
     protected ArrayList<Agent> assignedAgents;
     protected Location targetLocation;
+    protected Agent targetAgent;
 
     public Map<Class<? extends Agent>, Integer> getRequiredAgents() {
         return requiredAgents;
@@ -77,6 +78,10 @@ public abstract class Mission {
 
     public int getDuration() {
         return this.duration;
+    }
+
+    public Agent getTargetAgent() {
+        return this.targetAgent;
     }
 
     public Location getTargetLocation() {
