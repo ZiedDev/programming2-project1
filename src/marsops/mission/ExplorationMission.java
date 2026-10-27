@@ -1,6 +1,6 @@
 package marsops.mission;
 
-import java.util.List;
+import java.util.ArrayList;
 import marsops.agent.Agent;
 import marsops.agent.human.Scientist;
 import marsops.agent.robot.ExplorationRover;
@@ -24,12 +24,8 @@ public class ExplorationMission extends Mission {
         this.addRequiredResource(ResourceType.FOOD, requiredFood);
     }
     
-    @Override
-    public boolean validateRequirements(List<Agent> agents) {
-        return validateAgentsBasic(agents);
-    }
     @Override //override to change their location
-    public void assignAgents(List<Agent> agents) {
+    public void assignAgents(ArrayList<Agent> agents) {
         super.assignAgents(agents);
         for (Agent agent : this.assignedAgents) {
             agent.setCurrentLocation(new SurfaceLocation(region));

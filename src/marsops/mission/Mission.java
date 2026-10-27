@@ -2,7 +2,6 @@ package marsops.mission;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import marsops.agent.Agent;
 import marsops.resource.ResourceType;
@@ -16,7 +15,7 @@ public abstract class Mission {
     protected String failureReason;
     protected Map<ResourceType, Integer> requiredResources;
     protected Map<Class<? extends Agent>, Integer> requiredAgents;
-    protected List<Agent> assignedAgents;
+    protected ArrayList<Agent> assignedAgents;
 
     public Map<Class<? extends Agent>, Integer> getRequiredAgents() {
         return requiredAgents;
@@ -34,31 +33,12 @@ public abstract class Mission {
         this.assignedAgents = new ArrayList<>();
     }
 
-    public abstract boolean validateRequirements(List<Agent> agents);
-    
-    protected boolean validateAgentsBasic(List<Agent> agents) {
-        if (agents == null || agents.isEmpty()) {
-            this.failureReason = "No agents were provided for the mission.";
-            return false;
-        }
-        for (Agent agent : agents) {
-            if (!agent.canPerform(this)) {//assuming that it handles availability as well
-                this.failureReason = "Agent not available for mission.";
-                return false;
-            }
-        }
+    public boolean validateRequirements(){
         return true;
     }
 
-    public void assignAgents(List<Agent> agents) {
-        this.assignedAgents.clear();
-        if (agents != null) {
-            for (Agent agent : agents) {
-                agent.setAvailable(false);
-                agent.setAssignedMission(this);
-                this.assignedAgents.add(agent);
-            }
-        }
+    public void assignAgents(ArrayList<Agent> agents) {
+        this.assignedAgents = new ArrayList<>(agents);
         this.status = MissionStatus.ASSIGNED;
     }
 
@@ -83,56 +63,12 @@ public abstract class Mission {
     //complete and release agents
     public void complete() {
         this.status = MissionStatus.COMPLETED;
-        releaseAgents();
     }
 
     //fail mission with message
     public void fail(String reason) {
         this.status = MissionStatus.FAILED;
         this.failureReason = (reason != null) ? reason : "Unknown failure reason.";
-        releaseAgents();
-    }
-
-    //release agents duh (become free my slaves)
-    protected void releaseAgents() {
-        if (this.assignedAgents != null) {
-            for (Agent agent : this.assignedAgents) {
-                if (agent != null) {
-                    agent.setAvailable(true);
-                    agent.setAssignedMission(null);
-                }
-            }
-        }
-    }
-
-    // TODO (This check should not be here please refer to AgentManger.canPerformMission)
-    public List<Agent> findValidAgents(List<Agent> pool) {
-        List<Agent> toBeAssigned = new ArrayList<>();
-        if (pool == null || pool.isEmpty()) {
-            this.failureReason = "No agents available in the colony.";
-            return null;
-        }
-        // For each required agent type & count (e.g., Scientist -> 1, ExplorationRover -> 1)
-        for (Map.Entry<Class<? extends Agent>, Integer> entry : this.requiredAgents.entrySet()) {
-            Class<? extends Agent> requiredType = entry.getKey();
-            int neededCount = entry.getValue();
-            int foundCount = 0;
-            for (Agent agent : pool) {
-                if (requiredType.isInstance(agent) && agent.isAvailable() && agent.canPerform(this) && !toBeAssigned.contains(agent)) {
-                    toBeAssigned.add(agent);
-                    foundCount++;
-                    if (foundCount == neededCount) {
-                        break;
-                    }
-                }
-            }
-            //agents not fit >:[
-            if (foundCount < neededCount) {
-                this.failureReason = "Agent does not possess the required capability or is unavailable.";
-                return null;
-            }
-        }
-        return toBeAssigned;
     }
 
     //setters and getters
@@ -173,7 +109,7 @@ public abstract class Mission {
         return this.requiredResources;
     }
 
-    public List<Agent> getAssignedAgents() {
+    public ArrayList<Agent> getAssignedAgents() {
         return this.assignedAgents;
     }
 

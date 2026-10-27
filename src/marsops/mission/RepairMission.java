@@ -1,6 +1,6 @@
 package marsops.mission;
 
-import java.util.List;
+import java.util.ArrayList;
 import marsops.agent.Agent;
 import marsops.agent.human.Engineer;
 import marsops.agent.robot.RepairRobot;
@@ -33,12 +33,12 @@ public class RepairMission extends Mission {
     }
     
     @Override
-    public boolean validateRequirements(List<Agent> agents) {
+    public boolean validateRequirements() {
         if (this.damagedFacility == null && this.damagedEquipment == null) {
             this.failureReason = "No damaged facility or equipment specified for repair.";
             return false;
         }
-        return validateAgentsBasic(agents);
+        return true;
     }
     @Override
     public void complete() {
@@ -51,7 +51,7 @@ public class RepairMission extends Mission {
         }
     }
     @Override //override to change their location (only if they went to fix facility)
-    public void assignAgents(List<Agent> agents) {
+    public void assignAgents(ArrayList<Agent> agents) {
         super.assignAgents(agents);
         if(this.damagedFacility!=null){
             for (Agent agent : this.assignedAgents) {
