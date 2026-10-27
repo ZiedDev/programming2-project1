@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import marsops.agent.Agent;
+import marsops.facility.Location;
 import marsops.resource.ResourceType;
 
 public abstract class Mission {
@@ -16,6 +17,7 @@ public abstract class Mission {
     protected Map<ResourceType, Integer> requiredResources;
     protected Map<Class<? extends Agent>, Integer> requiredAgents;
     protected ArrayList<Agent> assignedAgents;
+    protected Location targetLocation;
 
     public Map<Class<? extends Agent>, Integer> getRequiredAgents() {
         return requiredAgents;
@@ -75,6 +77,10 @@ public abstract class Mission {
 
     public int getDuration() {
         return this.duration;
+    }
+
+    public Location getTargetLocation() {
+        return this.targetLocation;
     }
 
     public int getEquipmentCount() {

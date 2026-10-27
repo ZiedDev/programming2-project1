@@ -1,18 +1,17 @@
 package marsops.mission;
 
-import java.util.ArrayList;
-import marsops.agent.Agent;
 import marsops.agent.human.Scientist;
 import marsops.agent.robot.ExplorationRover;
 import marsops.facility.SurfaceLocation;
 import marsops.resource.ResourceType;
 
 public class ExplorationMission extends Mission {
-    private String region;
+    private final String region;
 
     public ExplorationMission(int duration, String region, int requiredRoverCount, int requiredScientistCount, int requiredBatteryCount, int requiredEquipmentCount, int requiredFuel, int requiredOxygen, int requiredWater, int requiredFood) {
         super(duration);
         this.region = region;
+        this.targetLocation = new SurfaceLocation(region);
         this.requiredEquipment = requiredEquipmentCount;
 
         this.requiredAgents.put(ExplorationRover.class, Math.max(1,requiredRoverCount));
@@ -24,13 +23,6 @@ public class ExplorationMission extends Mission {
         this.addRequiredResource(ResourceType.FOOD, requiredFood);
     }
     
-    @Override //override to change their location
-    public void assignAgents(ArrayList<Agent> agents) {
-        super.assignAgents(agents);
-        for (Agent agent : this.assignedAgents) {
-            agent.setCurrentLocation(new SurfaceLocation(region));
-        }
-    }
     public String getRegion() {
         return this.region;
     }
