@@ -64,7 +64,6 @@ public class Colony {
             rejectMission(mission, "Resources unavailable.");
             return false;
         }
-        // TODO: getFailureReason circular (will just return null)
         // check mission internal validity
         if (!mission.validateRequirements()) {
             rejectMission(mission, mission.getFailureReason());
@@ -82,11 +81,13 @@ public class Colony {
             return false;
         }
         // check agents
+        // TODO: overload to accept emergency too
         if (!this.agentManager.canProvide(emergency)) {
             rejectEmergency(emergency, "Agents unavailable.");
             return false;
         }
         // check resources
+        // TODO: overload to accept emergency too
         if (!this.facilityManager.canProvide(emergency)) {
             rejectEmergency(emergency, "Resources unavailable.");
             return false;
@@ -99,7 +100,7 @@ public class Colony {
 
         // valid emergency
         this.facilityManager.provide(emergency);
-        emergency.complete();
+        emergency.resolve();
         this.pastEmergencies.add(emergency);
         return true;
     }

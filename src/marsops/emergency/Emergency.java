@@ -28,8 +28,12 @@ public abstract class Emergency {
     }
 
     // NOTE: abstract
-    public boolean validateRequirements(){
+    public boolean validateRequirements() {
         return true;
+    }
+
+    public String getFailureReason() {
+        return this.failureReason;
     }
 
     public void resolve() {
@@ -53,6 +57,10 @@ public abstract class Emergency {
         if (amount > 0) {
             this.requiredResources.put(type, this.requiredResources.getOrDefault(type, 0) + amount);
         }
+    }
+
+    public EmergencyStatus getStatus() {
+        return this.status;
     }
 
     public Location getLocation() {

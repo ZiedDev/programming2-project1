@@ -45,7 +45,7 @@ public class Robot extends Agent {
     @Override
     public boolean canPerform(Mission mission) {
         if (!super.isAvailable()) return false;
-        return (batteryLevel - mission.getDuration()) < BATTERY_LEVEL_MIN;
+        return (batteryLevel - mission.getDuration()) >= BATTERY_LEVEL_MIN;
     }
 
     @Override
