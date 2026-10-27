@@ -9,6 +9,7 @@ public class Robot extends Agent {
     static final int BATTERY_LEVEL_MIN = 0;
 
     int batteryLevel;
+
     public Robot(Facility originLocation) {
         super(originLocation);
         this.batteryLevel = BATTERY_LEVEL_MAX;
@@ -42,9 +43,11 @@ public class Robot extends Agent {
             increaseBatteryLevel(time_unit);
         }
     }
+
     @Override
     public boolean canPerform(Mission mission) {
-        if (!super.isAvailable()) return false;
+        if (!super.isAvailable())
+            return false;
         return (batteryLevel - mission.getDuration()) >= BATTERY_LEVEL_MIN;
     }
 

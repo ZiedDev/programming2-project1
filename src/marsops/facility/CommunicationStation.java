@@ -2,7 +2,7 @@ package marsops.facility;
 
 import marsops.resource.ResourceType;
 
-public class CommunicationStation extends Facility{
+public class CommunicationStation extends Facility {
     public CommunicationStation(String location, int capacity) {
         super(location, capacity);
         prioToAllocate[0] = ResourceType.SPARE_PARTS;

@@ -7,7 +7,7 @@ import marsops.facility.Habitat;
 import marsops.facility.Laboratory;
 import marsops.resource.ResourceType;
 
-public class FireEmergency  extends Emergency {
+public class FireEmergency extends Emergency {
     private final Laboratory affectedLaboratory;
 
     public FireEmergency(

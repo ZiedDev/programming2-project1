@@ -7,12 +7,12 @@ import marsops.facility.Facility;
 import marsops.facility.Laboratory;
 import marsops.resource.ResourceType;
 
-public class MedicalEmergency  extends Emergency {
+public class MedicalEmergency extends Emergency {
     private final Human patient;
     private final Facility treatmentFacility;
 
     public MedicalEmergency(
-            Human  patient,
+            Human patient,
             Facility treatmentFacility,
             int requiredMedicalSuppliesCount) {
         super(treatmentFacility);

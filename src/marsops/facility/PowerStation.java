@@ -12,6 +12,6 @@ public class PowerStation extends Facility {
         prioToAllocate[4] = ResourceType.FOOD;
         prioToAllocate[5] = ResourceType.WATER;
         prioToAllocate[6] = ResourceType.MEDICAL;
-        //       
+        //
     }
 }

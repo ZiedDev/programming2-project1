@@ -63,7 +63,6 @@ public class resourceAllocationPolicy {
         PRIORITY_EQUIPMENT.add(PowerStation.class);
         PRIORITY_EQUIPMENT.add(Laboratory.class);
         PRIORITY_EQUIPMENT.add(Habitat.class);
-       
 
     }
 }

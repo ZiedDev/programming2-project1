@@ -5,5 +5,4 @@ package marsops.colony;
  */
 public class PrintManager {
 
-    
 }

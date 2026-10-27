@@ -58,7 +58,8 @@ public class Human extends Agent {
 
     @Override
     public boolean canPerform(Mission mission) {
-        if (!super.isAvailable()) return false;
+        if (!super.isAvailable())
+            return false;
         return fatigue + mission.getDuration() < FATIGUE_MAX;
     }
 

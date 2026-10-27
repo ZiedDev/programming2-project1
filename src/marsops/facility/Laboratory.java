@@ -12,6 +12,6 @@ public class Laboratory extends Facility {
         prioToAllocate[4] = ResourceType.MEDICAL;
         prioToAllocate[5] = ResourceType.FOOD;
         prioToAllocate[6] = ResourceType.WATER;
-            
+
     }
 }

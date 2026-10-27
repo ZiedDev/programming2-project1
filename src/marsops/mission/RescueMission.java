@@ -9,8 +9,9 @@ import marsops.resource.ResourceType;
 public class RescueMission extends Mission {
     private final Agent strandedAgent;
 
-    //constructor for agent
-    public RescueMission(int duration, Agent strandedAgent, int requiredRoverCount, int requiredMedicalOfficerCount, int requiredMedicalSuppliesCount, int requiredFuelCount) {
+    // constructor for agent
+    public RescueMission(int duration, Agent strandedAgent, int requiredRoverCount, int requiredMedicalOfficerCount,
+            int requiredMedicalSuppliesCount, int requiredFuelCount) {
         super(duration);
         this.strandedAgent = strandedAgent;
         this.targetLocation = (strandedAgent != null) ? strandedAgent.getCurrentLocation() : null;
@@ -23,7 +24,7 @@ public class RescueMission extends Mission {
         this.addRequiredResource(ResourceType.FUEL, requiredFuelCount);
     }
 
-    //constructor for region
+    // constructor for region
     public RescueMission(
             int duration,
             String targetRegion,

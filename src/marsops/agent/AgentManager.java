@@ -129,12 +129,12 @@ public class AgentManager {
             agent.setAssignedMission(null);
             relocate(agent, agent.getOriginLocation());
         }
-        if(mission instanceof RescueMission){
+        if (mission instanceof RescueMission) {
             rescue(mission);
         }
     }
 
-    public void rescue(Mission mission){
+    public void rescue(Mission mission) {
         Agent rescued = mission.getTargetAgent();
         if (mission.getStatus() == MissionStatus.COMPLETED && rescued != null) {
             rescued.setHealth(100);
@@ -155,7 +155,7 @@ public class AgentManager {
     }
 
     public void advanceTime(int time_unit) {
-        for(Agent agent: agents) {
+        for (Agent agent : agents) {
             agent.advanceTime(time_unit);
         }
     }

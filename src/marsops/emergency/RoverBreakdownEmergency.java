@@ -5,7 +5,7 @@ import marsops.agent.robot.ExplorationRover;
 import marsops.agent.robot.RepairRobot;
 import marsops.resource.ResourceType;
 
-public class RoverBreakdownEmergency  extends Emergency {
+public class RoverBreakdownEmergency extends Emergency {
     private final ExplorationRover damagedRover;
 
     public RoverBreakdownEmergency(

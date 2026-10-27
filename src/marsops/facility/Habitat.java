@@ -1,5 +1,7 @@
 package marsops.facility;
+
 import marsops.resource.ResourceType;
+
 public class Habitat extends Facility {
     public Habitat(String location, int capacity) {
         super(location, capacity);
@@ -11,6 +13,5 @@ public class Habitat extends Facility {
         prioToAllocate[5] = ResourceType.FUEL;
         prioToAllocate[6] = ResourceType.SPARE_PARTS;
     }
-    
-    
+
 }

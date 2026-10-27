@@ -12,6 +12,6 @@ public class StorageFacility extends Facility {
         prioToAllocate[4] = ResourceType.WATER;
         prioToAllocate[5] = ResourceType.OXYGEN;
         prioToAllocate[6] = ResourceType.MEDICAL;
-            
+
     }
 }

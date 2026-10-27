@@ -10,28 +10,32 @@ public class RepairMission extends Mission {
     private final Facility damagedFacility;
     private final Equipment damagedEquipment;
 
-    //gonna overload repair mission due to unknown repair target type: facility/equipment
-    public RepairMission(int duration, Facility damagedFacility, int requiredEngineerCount, int requiredRepairBotCount, int requiredBatteryCount, int requiredSparePartsCount) {
+    // gonna overload repair mission due to unknown repair target type:
+    // facility/equipment
+    public RepairMission(int duration, Facility damagedFacility, int requiredEngineerCount, int requiredRepairBotCount,
+            int requiredBatteryCount, int requiredSparePartsCount) {
         super(duration);
         this.damagedFacility = damagedFacility;
         this.targetLocation = damagedFacility;
         this.damagedEquipment = null;
-        this.requiredAgents.put(RepairRobot.class, Math.max(1,requiredRepairBotCount));
-        this.requiredAgents.put(Engineer.class, Math.max(1,requiredEngineerCount));
+        this.requiredAgents.put(RepairRobot.class, Math.max(1, requiredRepairBotCount));
+        this.requiredAgents.put(Engineer.class, Math.max(1, requiredEngineerCount));
         this.addRequiredResource(ResourceType.BATTERY, requiredBatteryCount);
         this.addRequiredResource(ResourceType.SPARE_PARTS, requiredSparePartsCount);
     }
-    public RepairMission(int duration, Equipment damagedEquipment, int requiredEngineerCount, int requiredRepairBotCount, int requiredBatteryCount, int requiredSparePartsCount) {
+
+    public RepairMission(int duration, Equipment damagedEquipment, int requiredEngineerCount,
+            int requiredRepairBotCount, int requiredBatteryCount, int requiredSparePartsCount) {
         super(duration);
         this.damagedEquipment = damagedEquipment;
         this.targetLocation = damagedEquipment.getLocation();
         this.damagedFacility = null;
-        this.requiredAgents.put(RepairRobot.class, Math.max(1,requiredRepairBotCount));
-        this.requiredAgents.put(Engineer.class, Math.max(1,requiredEngineerCount));
+        this.requiredAgents.put(RepairRobot.class, Math.max(1, requiredRepairBotCount));
+        this.requiredAgents.put(Engineer.class, Math.max(1, requiredEngineerCount));
         this.addRequiredResource(ResourceType.BATTERY, requiredBatteryCount);
         this.addRequiredResource(ResourceType.SPARE_PARTS, requiredSparePartsCount);
     }
-    
+
     @Override
     public boolean validateRequirements() {
         if (this.damagedFacility == null && this.damagedEquipment == null) {
@@ -40,20 +44,23 @@ public class RepairMission extends Mission {
         }
         return true;
     }
+
     @Override
     public void complete() {
         super.complete();
         if (this.damagedFacility != null) {
-            this.damagedFacility.setAvailability(true);//assuming availability is the flag for fixed or not
+            this.damagedFacility.setAvailability(true);// assuming availability is the flag for fixed or not
         }
         if (this.damagedEquipment != null) {
             this.damagedEquipment.fix();
         }
     }
-    public Facility getDamagedFacility(){
+
+    public Facility getDamagedFacility() {
         return this.damagedFacility;
     }
-    public Equipment getDamagedEquipment(){
+
+    public Equipment getDamagedEquipment() {
         return this.damagedEquipment;
     }
 }

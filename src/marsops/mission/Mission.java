@@ -36,8 +36,9 @@ public abstract class Mission {
         this.assignedAgents = new ArrayList<>();
     }
 
-    // NOTE: abstract as this is extremely unreadable cuz i failed to see that it sets failureReason in the overrides
-    public boolean validateRequirements(){
+    // NOTE: abstract as this is extremely unreadable cuz i failed to see that it
+    // sets failureReason in the overrides
+    public boolean validateRequirements() {
         return true;
     }
 
@@ -46,7 +47,7 @@ public abstract class Mission {
         this.status = MissionStatus.ASSIGNED;
     }
 
-    //time advancement according to state graph (I hope we make the graph </3)
+    // time advancement according to state graph (I hope we make the graph </3)
     public void tick(int timeUnits) {
         if (this.status == MissionStatus.COMPLETED || this.status == MissionStatus.FAILED || this.status == null) {
             return;
@@ -64,18 +65,18 @@ public abstract class Mission {
         }
     }
 
-    //complete and release agents
+    // complete and release agents
     public void complete() {
         this.status = MissionStatus.COMPLETED;
     }
 
-    //fail mission with message
+    // fail mission with message
     public void fail(String reason) {
         this.status = MissionStatus.FAILED;
         this.failureReason = (reason != null) ? reason : "Unknown failure reason.";
     }
 
-    //setters and getters
+    // setters and getters
 
     public int getDuration() {
         return this.duration;
@@ -130,6 +131,5 @@ public abstract class Mission {
             this.requiredResources.put(type, this.requiredResources.getOrDefault(type, 0) + amount);
         }
     }
-
 
 }
