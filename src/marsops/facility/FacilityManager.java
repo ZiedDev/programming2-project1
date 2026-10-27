@@ -10,25 +10,43 @@ import marsops.resource.resourceAllocationPolicy;
 
 public class FacilityManager {
     private List<Facility> facilityList;
-    private Map<ResourceType, Integer> totalResourceAmount;
-    private int functionalEquipmentCount;
 
     public FacilityManager() {
         facilityList = new ArrayList<>();
-        totalResourceAmount = new HashMap<>();
-        functionalEquipmentCount = 0;
+    }
+
+    public Map<ResourceType, Integer> getTotalResources() {
+        Map<ResourceType, Integer> ans = new HashMap<>();
+        for (Facility x : facilityList) {
+            if (x.isAvailable()) {
+                x.getResources().forEach((key, value) -> ans.merge(key, value, Integer::sum));
+            }
+        }
+        return ans;
+    }
+
+    public int getTotalEquipment() {
+        int ans = 0;
+        for (Facility x : facilityList) {
+            if (x.isAvailable()) {
+                ans = ans + x.getEquipmentCount();
+            }
+        }
+        return ans;
     }
 
     public boolean canProvide(Mission mission) {
         boolean can = true;
-        for (Map.Entry<ResourceType, Integer> entry : totalResourceAmount.entrySet()) {
+        Map<ResourceType, Integer> availableResources = getTotalResources();
+        for (Map.Entry<ResourceType, Integer> entry : mission.getRequiredResources().entrySet()) {
             ResourceType resource = entry.getKey();
-            int available = entry.getValue();
-            if (mission.getRequiredResources().get(resource) > available) {
+            int available = availableResources.get(resource);
+            int required = entry.getValue();
+            if (required > available) {
                 can = false;
             }
         }
-        if (mission.getEquipmentCount() > functionalEquipmentCount) {
+        if (mission.getEquipmentCount() > getTotalEquipment()) {
             can = false;
         }
         return can;

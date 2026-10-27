@@ -45,15 +45,27 @@ abstract public class Facility extends Location {
     public int getCapacity() {
         return this.capacity;
     }
-    public boolean isAvailable(){
+
+    public boolean isAvailable() {
         return this.isAvailable;
     }
+
     public Map<ResourceType, Integer> getResources() {
         return this.resourceAmount;
     }
 
     public List<Equipment> getEquipment() {
         return this.equipmentList;
+    }
+
+    public int getEquipmentCount() {
+        int ans = 0;
+        for (Equipment i : equipmentList) {
+            if (i.isAvailable()) {
+                ans++;
+            }
+        }
+        return ans;
     }
 
     // public int getTotalTakenCapacity(){
@@ -79,15 +91,17 @@ abstract public class Facility extends Location {
     }
 
     public int deductEquipment(int amount) { // returns number of equipment that still need to be deducted
+        List<Equipment> toRemove = new ArrayList<>();
         for (Equipment i : equipmentList) {
             if (amount == 0) {
                 break;
             }
             if (i.isAvailable()) {
-                equipmentList.remove(i);
+                toRemove.add(i);
                 amount--;
             }
         }
+        equipmentList.removeAll(toRemove);
         return amount;
     }
 
