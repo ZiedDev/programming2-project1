@@ -16,7 +16,6 @@ public class Colony {
     private Mission activeMission;
     private Environment environment;
     private List<Mission> pastMissions;
-    private List<Agent> agents;
     public AgentManager agentManager;
     public FacilityManager facilityManager;
 
@@ -71,7 +70,7 @@ public class Colony {
     }
 
     public void advanceTime(int time_unit){
-        this.agentManager.tick(time_unit);
+        this.agentManager.advanceTime(time_unit);
         if(this.activeMission!=null){
             if (this.environment == Environment.DUST_STORM && this.activeMission instanceof ExplorationMission) {
                 this.activeMission.fail("Mission failed due to a dust storm.");
@@ -84,7 +83,7 @@ public class Colony {
             }
             if(this.activeMission.getStatus()==MissionStatus.COMPLETED||this.activeMission.getStatus()==MissionStatus.FAILED){
                 addCompletedMission(this.activeMission);
-                this.agentManager.releaseAgents(this.activeMission.getAssignedAgents());
+                this.agentManager.release(this.activeMission);
                 this.activeMission=null;
             }
         }
