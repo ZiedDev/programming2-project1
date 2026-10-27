@@ -18,6 +18,10 @@ public abstract class Mission {
     protected Map<Class<? extends Agent>, Integer> requiredAgents;
     protected List<Agent> assignedAgents;
 
+    public Map<Class<? extends Agent>, Integer> getRequiredAgents() {
+        return requiredAgents;
+    }
+
     public Mission(int duration) {
         this.duration = duration;
         this.elapsed = 0;
@@ -101,6 +105,7 @@ public abstract class Mission {
         }
     }
 
+    // TODO (This check should not be here please refer to AgentManger.canPerformMission)
     public List<Agent> findValidAgents(List<Agent> pool) {
         List<Agent> toBeAssigned = new ArrayList<>();
         if (pool == null || pool.isEmpty()) {
