@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 public class resourceAllocationPolicy {
     public static final Map<ResourceType, List<Class<? extends Facility>>> PRIORITY = new HashMap<>();
+    public static final List<Class<? extends Facility>> PRIORITY_EQUIPMENT = new ArrayList<>();
     static {
         List<Class<? extends Facility>> oxygenPrio = new ArrayList<>();
         oxygenPrio.add(StorageFacility.class);
@@ -57,6 +58,12 @@ public class resourceAllocationPolicy {
         sparePartsPrio.add(Laboratory.class);
         sparePartsPrio.add(Habitat.class);
         PRIORITY.put(ResourceType.SPARE_PARTS, sparePartsPrio);
+
+        PRIORITY_EQUIPMENT.add(StorageFacility.class);
+        PRIORITY_EQUIPMENT.add(PowerStation.class);
+        PRIORITY_EQUIPMENT.add(Laboratory.class);
+        PRIORITY_EQUIPMENT.add(Habitat.class);
+       
 
     }
 }

@@ -45,7 +45,9 @@ abstract public class Facility extends Location {
     public int getCapacity() {
         return this.capacity;
     }
-
+    public boolean isAvailable(){
+        return this.isAvailable;
+    }
     public Map<ResourceType, Integer> getResources() {
         return this.resourceAmount;
     }

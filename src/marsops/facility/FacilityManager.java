@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import marsops.mission.Mission;
+import marsops.resource.resourceAllocationPolicy;
 
 public class FacilityManager {
     private List<Facility> facilityList;
@@ -31,6 +32,33 @@ public class FacilityManager {
             can = false;
         }
         return can;
+    }
+
+    public void provide(Mission mission) {
+        Map<ResourceType, Integer> requiredResources = mission.getRequiredResources();
+        int requiredEquipment = mission.getEquipmentCount();
+        for (Map.Entry<ResourceType, Integer> entry : requiredResources.entrySet()) { // deduct resources
+            ResourceType resource = entry.getKey();
+            int amount = entry.getValue();
+            for (Class<? extends Facility> currClass : resourceAllocationPolicy.PRIORITY.get(resource)) {
+                for (Facility x : facilityList) {
+                    if (x.getClass() == currClass && x.isAvailable() && amount > 0) {
+                        amount = x.deductResource(amount, resource);
+                    } else if (amount <= 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        for (Class<? extends Facility> currClass : resourceAllocationPolicy.PRIORITY_EQUIPMENT) { // deduct equipment
+            for (Facility x : facilityList) {
+                if (x.getClass() == currClass && x.isAvailable() && requiredEquipment > 0) {
+                    requiredEquipment = x.deductEquipment(requiredEquipment);
+                } else if (requiredEquipment <= 0) {
+                    break;
+                }
+            }
+        }
     }
 
 }
