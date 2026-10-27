@@ -110,7 +110,7 @@ public class AgentManager {
                 agent.setAvailable(false);
                 agent.setAssignedMission(mission);
                 if (mission.getTargetLocation() != null) {
-                    relocateAgent(agent, mission.getTargetLocation());
+                    relocate(agent, mission.getTargetLocation());
                 }
 
                 neededCount--;
@@ -120,12 +120,22 @@ public class AgentManager {
         return agentsToProvide;
     }
 
-    public void relocateAgent(Agent agent, Location location) {
+    public void release(Mission mission) {
+        ArrayList<Agent> assignedAgents = mission.getAssignedAgents();
+
+        for (Agent agent : assignedAgents) {
+            agent.setAvailable(true);
+            agent.setAssignedMission(null);
+            relocate(agent, agent.getOriginLocation());
+        }
+    }
+
+    public void relocate(Agent agent, Location location) {
         agent.setCurrentLocation(location);
     }
 
-    public void relocateAgent(ArrayList<Agent> agents, Location location) {
-        for (Agent agent: agents) {
+    public void relocate(ArrayList<Agent> agents, Location location) {
+        for (Agent agent : agents) {
             agent.setCurrentLocation(location);
         }
     }
