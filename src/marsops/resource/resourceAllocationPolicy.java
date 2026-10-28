@@ -4,110 +4,61 @@ import marsops.facility.*;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
-
-public class ResourceAllocationPolicy {
-    public static final Map<ResourceType, List<Class<? extends Facility>>> PRIORITY = new HashMap<>();
-    public static final List<Class<? extends Facility>> PRIORITY_EQUIPMENT = new ArrayList<>();
-    static {
-        List<Class<? extends Facility>> oxygenPrio = new ArrayList<>();
-        oxygenPrio.add(StorageFacility.class);
-        oxygenPrio.add(Laboratory.class);
-        oxygenPrio.add(PowerStation.class);
-        oxygenPrio.add(Habitat.class);
-        PRIORITY.put(ResourceType.OXYGEN, oxygenPrio);
-
-        List<Class<? extends Facility>> waterPrio = new ArrayList<>();
-        waterPrio.add(StorageFacility.class);
-        waterPrio.add(Habitat.class);
-        waterPrio.add(Laboratory.class);
-        waterPrio.add(PowerStation.class);
-        PRIORITY.put(ResourceType.WATER, waterPrio);
-
-        List<Class<? extends Facility>> foodPrio = new ArrayList<>();
-        foodPrio.add(StorageFacility.class);
-        foodPrio.add(Habitat.class);
-        foodPrio.add(Laboratory.class);
-        foodPrio.add(PowerStation.class);
-        PRIORITY.put(ResourceType.FOOD, foodPrio);
-
-        List<Class<? extends Facility>> fuelPrio = new ArrayList<>();
-        fuelPrio.add(StorageFacility.class);
-        fuelPrio.add(PowerStation.class);
-        fuelPrio.add(Laboratory.class);
-        fuelPrio.add(Habitat.class);
-        PRIORITY.put(ResourceType.FUEL, fuelPrio);
-
-        List<Class<? extends Facility>> batteryPrio = new ArrayList<>();
-        batteryPrio.add(StorageFacility.class);
-        batteryPrio.add(PowerStation.class);
-        batteryPrio.add(Laboratory.class);
-        batteryPrio.add(Habitat.class);
-        PRIORITY.put(ResourceType.BATTERY, batteryPrio);
-
-        List<Class<? extends Facility>> medicalPrio = new ArrayList<>();
-        medicalPrio.add(StorageFacility.class);
-        medicalPrio.add(Laboratory.class);
-        medicalPrio.add(Habitat.class);
-        medicalPrio.add(PowerStation.class);
-        PRIORITY.put(ResourceType.MEDICAL, medicalPrio);
-
-        List<Class<? extends Facility>> sparePartsPrio = new ArrayList<>();
-        sparePartsPrio.add(StorageFacility.class);
-        sparePartsPrio.add(PowerStation.class);
-        sparePartsPrio.add(Laboratory.class);
-        sparePartsPrio.add(Habitat.class);
-        PRIORITY.put(ResourceType.SPARE_PARTS, sparePartsPrio);
-
-        PRIORITY_EQUIPMENT.add(StorageFacility.class);
-        PRIORITY_EQUIPMENT.add(PowerStation.class);
-        PRIORITY_EQUIPMENT.add(Laboratory.class);
-        PRIORITY_EQUIPMENT.add(Habitat.class);
-
-    }
-}
-
-// TODO:  i intially wanted to look into the public -> private thing
-//  but consider this code
-/* 
-package marsops.resource;
-
-import marsops.facility.*;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import static java.util.Map.entry;
 
 public final class ResourceAllocationPolicy {
-    private static final List<Class<? extends Facility>> DEFAULT_PRIORITY = List.of(
-        StorageFacility.class,
-        PowerStation.class,
-        Laboratory.class,
-        Habitat.class
-    );
-    
-    private static final Map<ResourceType, List<Class<? extends Facility>>> PRIORITY = Map.ofEntries(
-        entry(ResourceType.OXYGEN, List.of(StorageFacility.class, Laboratory.class, PowerStation.class, Habitat.class)),
-        entry(ResourceType.WATER,  List.of(StorageFacility.class, Habitat.class, Laboratory.class, PowerStation.class)),
-        entry(ResourceType.FOOD,   List.of(StorageFacility.class, Habitat.class, Laboratory.class, PowerStation.class)),
-        entry(ResourceType.FUEL,   List.of(StorageFacility.class, PowerStation.class, Laboratory.class, Habitat.class)),
-        entry(ResourceType.BATTERY, List.of(StorageFacility.class, PowerStation.class, Laboratory.class, Habitat.class)),
-        entry(ResourceType.MEDICAL, List.of(StorageFacility.class, Laboratory.class, Habitat.class, PowerStation.class)),
-        entry(ResourceType.SPARE_PARTS, List.of(StorageFacility.class, PowerStation.class, Laboratory.class, Habitat.class))
-    );
-    
-    // Private constructor prevents instantiation
-    private ResourceAllocationPolicy() {}
-    
-    
-    // Retrieves the prioritized list of facility types for a given resource.
-   public static List<Class<? extends Facility>> getPriority(ResourceType resourceType) {
-       return PRIORITY.getOrDefault(resourceType, Collections.emptyList());
+    private static final Map<ResourceType, List<Class<? extends Facility>>> PRIORITY;
+    private static final List<Class<? extends Facility>> DEFAULT_PRIORITY;
+    static {
+        DEFAULT_PRIORITY = List.of(
+                StorageFacility.class,
+                PowerStation.class,
+                Laboratory.class,
+                Habitat.class);
+
+        List<Class<? extends Facility>> oxygenPrio = List.of(
+                StorageFacility.class,
+                Laboratory.class,
+                PowerStation.class,
+                Habitat.class);
+
+        List<Class<? extends Facility>> lifeSupportPrio = List.of(
+                StorageFacility.class,
+                Habitat.class,
+                Laboratory.class,
+                PowerStation.class);
+
+        List<Class<? extends Facility>> medicalPrio = List.of(
+                StorageFacility.class,
+                Laboratory.class,
+                Habitat.class,
+                PowerStation.class);
+
+        Map<ResourceType, List<Class<? extends Facility>>> map = new HashMap<>();
+        map.put(ResourceType.OXYGEN, oxygenPrio);
+        map.put(ResourceType.WATER, lifeSupportPrio);
+        map.put(ResourceType.FOOD, lifeSupportPrio);
+        map.put(ResourceType.FUEL, DEFAULT_PRIORITY);
+        map.put(ResourceType.BATTERY, DEFAULT_PRIORITY);
+        map.put(ResourceType.SPARE_PARTS, DEFAULT_PRIORITY);
+        map.put(ResourceType.MEDICAL, medicalPrio);
+
+        // 3. Lock the map so it cannot be modified after startup
+        PRIORITY = Collections.unmodifiableMap(map);
+
     }
-    
-    // Equipment priority default.
-   public static List<Class<? extends Facility>> getEquipmentPriority() {
-       return DEFAULT_PRIORITY;
+
+    private ResourceAllocationPolicy() {
+    }
+
+    public static List<Class<? extends Facility>> getPriority(ResourceType resourceType) {
+        return PRIORITY.getOrDefault(resourceType, DEFAULT_PRIORITY);
+    }
+
+    public static List<Class<? extends Facility>> getEquipmentPriority() {
+        return DEFAULT_PRIORITY;
     }
 }
-*/
+
+// this code makes use of the immutable lists and maps and getters recommended
+// by previous todo
