@@ -87,7 +87,7 @@ abstract public class Facility extends Location {
     public boolean addEquipment() { // return true if successfully allocated
         if (totalTakenCapacity < capacity) {
             totalTakenCapacity++;
-            Equipment x = new Equipment();
+            Equipment x = new Equipment(this);
             equipmentList.add(x);
             return true;
         }
@@ -103,6 +103,7 @@ abstract public class Facility extends Location {
             if (i.isAvailable()) {
                 toRemove.add(i);
                 amount--;
+                this.totalTakenCapacity--;
             }
         }
         equipmentList.removeAll(toRemove);
@@ -131,6 +132,7 @@ abstract public class Facility extends Location {
     int deductResource(int amount, ResourceType resource) { // returns undeducted amount
         int toSubt = Math.min(this.resourceAmount.get(resource), amount);
         this.resourceAmount.put(resource, this.resourceAmount.get(resource) - toSubt);
+        this.totalTakenCapacity -= toSubt;
         return amount - toSubt;
     }
 

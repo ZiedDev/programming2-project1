@@ -8,9 +8,10 @@ public class Equipment {
     private int id;
     private Location location;
 
-    public Equipment() {
+    public Equipment(Location location) {
         this.isDamaged = false;
         id = ++cnt;
+        this.location = location;
     }
 
     public int getId() {
