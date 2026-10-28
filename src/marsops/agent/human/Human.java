@@ -32,6 +32,10 @@ public abstract class Human extends Agent {
         this.fatigue = 0;
     }
 
+    public static void resetIds() {
+        ASSIGNED_IDS.clear();
+    }
+
     public String getName() {
         return name;
     }

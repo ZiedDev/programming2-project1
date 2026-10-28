@@ -48,6 +48,7 @@ public class Colony {
     }
 
     public static void resetInstance() {
+        Human.resetIds();
         instance = new Colony();
     }
 

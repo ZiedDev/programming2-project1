@@ -4,13 +4,15 @@ import java.util.List;
 
 import marsops.emergency.Emergency;
 import marsops.facility.Facility;
+import marsops.mission.ExplorationMission;
 import marsops.mission.Mission;
 import marsops.mission.ResearchMission;
 
 public class Scientist extends Human {
 
     private static final List<Class<? extends Mission>> ALLOWED_MISSIONS = List.of(
-        ResearchMission.class
+        ResearchMission.class,
+        ExplorationMission.class
     );
 
     private static final List<Class<? extends Emergency>> ALLOWED_EMERGENCIES = List.of(
