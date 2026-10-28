@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-public class resourceAllocationPolicy {
+public class ResourceAllocationPolicy {
     public static final Map<ResourceType, List<Class<? extends Facility>>> PRIORITY = new HashMap<>();
     public static final List<Class<? extends Facility>> PRIORITY_EQUIPMENT = new ArrayList<>();
     static {
@@ -66,3 +66,48 @@ public class resourceAllocationPolicy {
 
     }
 }
+
+// TODO:  i intially wanted to look into the public -> private thing
+//  but consider this code
+/* 
+package marsops.resource;
+
+import marsops.facility.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import static java.util.Map.entry;
+
+public final class ResourceAllocationPolicy {
+    private static final List<Class<? extends Facility>> DEFAULT_PRIORITY = List.of(
+        StorageFacility.class,
+        PowerStation.class,
+        Laboratory.class,
+        Habitat.class
+    );
+    
+    private static final Map<ResourceType, List<Class<? extends Facility>>> PRIORITY = Map.ofEntries(
+        entry(ResourceType.OXYGEN, List.of(StorageFacility.class, Laboratory.class, PowerStation.class, Habitat.class)),
+        entry(ResourceType.WATER,  List.of(StorageFacility.class, Habitat.class, Laboratory.class, PowerStation.class)),
+        entry(ResourceType.FOOD,   List.of(StorageFacility.class, Habitat.class, Laboratory.class, PowerStation.class)),
+        entry(ResourceType.FUEL,   List.of(StorageFacility.class, PowerStation.class, Laboratory.class, Habitat.class)),
+        entry(ResourceType.BATTERY, List.of(StorageFacility.class, PowerStation.class, Laboratory.class, Habitat.class)),
+        entry(ResourceType.MEDICAL, List.of(StorageFacility.class, Laboratory.class, Habitat.class, PowerStation.class)),
+        entry(ResourceType.SPARE_PARTS, List.of(StorageFacility.class, PowerStation.class, Laboratory.class, Habitat.class))
+    );
+    
+    // Private constructor prevents instantiation
+    private ResourceAllocationPolicy() {}
+    
+    
+    // Retrieves the prioritized list of facility types for a given resource.
+   public static List<Class<? extends Facility>> getPriority(ResourceType resourceType) {
+       return PRIORITY.getOrDefault(resourceType, Collections.emptyList());
+    }
+    
+    // Equipment priority default.
+   public static List<Class<? extends Facility>> getEquipmentPriority() {
+       return DEFAULT_PRIORITY;
+    }
+}
+*/

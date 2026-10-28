@@ -8,7 +8,7 @@ import marsops.emergency.Emergency;
 import marsops.facility.Facility;
 import marsops.mission.Mission;
 import marsops.resource.ResourceType;
-import marsops.resource.resourceAllocationPolicy;
+import marsops.resource.ResourceAllocationPolicy;
 
 public class FacilityManager {
     private final List<Facility> facilityList;
@@ -90,7 +90,7 @@ public class FacilityManager {
         for (Map.Entry<ResourceType, Integer> entry : requiredResources.entrySet()) { // deduct resources
             ResourceType resource = entry.getKey();
             int amount = entry.getValue();
-            for (Class<? extends Facility> currClass : resourceAllocationPolicy.PRIORITY.get(resource)) {
+            for (Class<? extends Facility> currClass : ResourceAllocationPolicy.PRIORITY.get(resource)) {
                 for (Facility x : facilityList) {
                     if (x.getClass() == currClass && x.isAvailable() && amount > 0) {
                         amount = x.deductResource(amount, resource);
@@ -100,7 +100,7 @@ public class FacilityManager {
                 }
             }
         }
-        for (Class<? extends Facility> currClass : resourceAllocationPolicy.PRIORITY_EQUIPMENT) { // deduct equipment
+        for (Class<? extends Facility> currClass : ResourceAllocationPolicy.PRIORITY_EQUIPMENT) { // deduct equipment
             for (Facility x : facilityList) {
                 if (x.getClass() == currClass && x.isAvailable() && requiredEquipment > 0) {
                     requiredEquipment = x.deductEquipment(requiredEquipment);
