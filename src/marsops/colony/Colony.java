@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import marsops.agent.Agent;
+import marsops.agent.human.Human;
+import marsops.agent.robot.Robot;
 import marsops.emergency.Emergency;
+import marsops.facility.Facility;
 import marsops.mission.ExplorationMission;
 import marsops.mission.Mission;
 import marsops.mission.MissionStatus;
@@ -49,15 +52,44 @@ public class Colony {
     }
 
     // no methods to hide + easier to call that delegation
-    public PrintManager getPrintManager() {return this.printManager;}
+    public PrintManager getPrintManager() {
+        return this.printManager;
+    }
 
-    public Map<ResourceType, Integer> getTotalResources() { return this.facilityManager.getTotalResources();}
+    // facilityManager delegates
+    public void addFacility(Facility x) {
+        this.facilityManager.addFacility(x);
+    }
 
-    public int getTotalEquipment() { return this.facilityManager.getTotalEquipment();}
+    public List<Facility> getFacilities() {
+        return this.facilityManager.getFacilities();
+    }
 
-    public ArrayList<Agent> getAgents() {return this.agentManager.getAgents();}
+    public Map<ResourceType, Integer> getTotalResources() {
+        return this.facilityManager.getTotalResources();
+    }
 
-    // TODO: delegate rest of facilityManager and agentManager
+    public int getTotalEquipment() {
+        return this.facilityManager.getTotalEquipment();
+    }
+
+    // agentManager delegates
+    public Human createAgent(Class<? extends Human> type, Facility originLocation, String name, String id) {
+        return this.agentManager.createAgent(type, originLocation, name, id);
+    }
+
+    // Creating a Robot
+    public Robot createAgent(Class<? extends Robot> type, Facility originLocation) {
+        return this.agentManager.createAgent(type, originLocation);
+    }
+
+    public void addAgent(Agent agent) {
+        this.agentManager.addAgent(agent);
+    }
+
+    public ArrayList<Agent> getAgents() {
+        return this.agentManager.getAgents();
+    }
 
     public boolean submitMission(Mission mission) {
         if (mission == null) {
@@ -147,14 +179,14 @@ public class Colony {
         if (this.activeMission != null) {
             if (this.environment == Environment.DUST_STORM && this.activeMission instanceof ExplorationMission) {
                 this.activeMission.fail("Mission failed due to a dust storm.");
-            }
-            else if (this.environment == Environment.COMM_DISRUPTION && this.activeMission.isCommunicationDependent()) {
+            } else if (this.environment == Environment.COMM_DISRUPTION
+                    && this.activeMission.isCommunicationDependent()) {
                 this.activeMission.fail("Mission failed due to communication disruption.");
-            }
-            else {
+            } else {
                 this.activeMission.tick(timeUnit);
             }
-            if (this.activeMission.getStatus() == MissionStatus.COMPLETED || this.activeMission.getStatus() == MissionStatus.FAILED) {
+            if (this.activeMission.getStatus() == MissionStatus.COMPLETED
+                    || this.activeMission.getStatus() == MissionStatus.FAILED) {
                 addCompletedMission(this.activeMission);
                 this.agentManager.release(this.activeMission);
                 this.activeMission = null;
