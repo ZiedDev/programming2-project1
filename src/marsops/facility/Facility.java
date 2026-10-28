@@ -84,14 +84,14 @@ abstract public class Facility extends Location {
         return totalTakenCapacity;
     }
 
-    public boolean addEquipment() { // return true if successfully allocated
-        if (totalTakenCapacity < capacity) {
+    public int addEquipment(int amount) { // returns number of unallocated equipment
+        while (amount > 0 && totalTakenCapacity < capacity) {
             totalTakenCapacity++;
             Equipment x = new Equipment(this);
             equipmentList.add(x);
-            return true;
+            amount--;
         }
-        return false;
+        return amount;
     }
 
     public int deductEquipment(int amount) { // returns number of equipment that still need to be deducted

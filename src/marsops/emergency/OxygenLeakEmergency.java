@@ -27,9 +27,7 @@ public class OxygenLeakEmergency extends Emergency {
     }
 
     private void applyOxygenLoss() {
-        int currentOxygen = affectedHabitat.getResources().getOrDefault(ResourceType.OXYGEN, 0);
-        int deduction = Math.min(currentOxygen, oxygenLoss);
-        affectedHabitat.getResources().put(ResourceType.OXYGEN, currentOxygen - deduction);
+        affectedHabitat.deductResource(oxygenLoss, ResourceType.OXYGEN);
     }
 
     @Override

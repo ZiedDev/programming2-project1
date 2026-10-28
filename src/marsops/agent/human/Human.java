@@ -1,11 +1,15 @@
 package marsops.agent.human;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import marsops.agent.Agent;
 import marsops.emergency.Emergency;
 import marsops.facility.Facility;
 import marsops.mission.Mission;
 
 public abstract class Human extends Agent {
+    private static final Set<String> ASSIGNED_IDS = new HashSet<>();
     static final int FATIGUE_MAX = 100;
     static final int FATIGUE_MIN = 0;
 
@@ -15,8 +19,16 @@ public abstract class Human extends Agent {
 
     public Human(Facility originLocation, String name, String id) {
         super(originLocation);
+
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("ID cannot be empty.");
+        }
+        if (!ASSIGNED_IDS.add(id)) {
+            throw new IllegalArgumentException("ID already exists: " + id);
+        }
+
         this.name = name;
-        this.id = id; // TODO: make unique
+        this.id = id;
         this.fatigue = 0;
     }
 
@@ -59,14 +71,14 @@ public abstract class Human extends Agent {
 
     @Override
     public boolean canPerform(Mission mission) {
-        if (!super.isAvailable())
+        if (!super.canPerform(mission))
             return false;
         return fatigue + mission.getDuration() < FATIGUE_MAX;
     }
 
     @Override
     public boolean canHandle(Emergency emergency) {
-        if (!super.isAvailable())
+        if (!super.canHandle(emergency))
             return false;
         return fatigue < FATIGUE_MAX;
     }

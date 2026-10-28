@@ -33,6 +33,7 @@ public class Main {
         storageResources.put(ResourceType.FUEL, 200);
         storageResources.put(ResourceType.SPARE_PARTS, 50);
         storage.addResources(storageResources);
+        storage.addEquipment(2);
         colony.getFacilityManager().addFacility(habitat);
         colony.getFacilityManager().addFacility(storage);
         colony.getAgentManager().createAgent(Scientist.class, habitat, "Hesham", "10062");
