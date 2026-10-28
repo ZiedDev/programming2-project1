@@ -1,0 +1,97 @@
+@startuml MarsOps_Facility_Class_Diagram
+
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam classFontStyle bold
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+
+package "marsops.facility" {
+
+    abstract class Location {
+        # location: String
+        + Location(location: String)
+        + getLocation(): String
+    }
+
+    class SurfaceLocation extends Location {
+        + SurfaceLocation(location: String)
+    }
+
+    abstract class Facility extends Location {
+        - capacity: int
+        - resourceAmount: Map<ResourceType, Integer>
+        - equipmentList: List<Equipment>
+        - id: int
+        - {static} cnt: int = 0
+        - isAvailable: boolean
+        - totalTakenCapacity: int = 0
+        # prioToAllocate: ResourceType[7]
+        + Facility(location: String, capacity: int)
+        + getId(): int
+        + setAvailability(state: boolean): void
+        + getCapacity(): int
+        + isAvailable(): boolean
+        + getResources(): Map<ResourceType, Integer>
+        + getEquipment(): List<Equipment>
+        + getEquipmentCount(): int
+        + getTotalTakenCapacity(): int
+        + addEquipment(): boolean
+        + deductEquipment(amount: int): int
+        + addResources(resourcesToAllocate: Map<ResourceType, Integer>): Map<ResourceType, Integer>
+        + deductResource(amount: int, resource: ResourceType): int
+    }
+
+    class Habitat extends Facility {
+        + Habitat(location: String, capacity: int)
+    }
+
+    class Laboratory extends Facility {
+        + Laboratory(location: String, capacity: int)
+    }
+
+    class PowerStation extends Facility {
+        + PowerStation(location: String, capacity: int)
+    }
+
+    class StorageFacility extends Facility {
+        + StorageFacility(location: String, capacity: int)
+    }
+
+    class CommunicationStation extends Facility {
+        + CommunicationStation(location: String, capacity: int)
+    }
+}
+
+package "marsops.resource" {
+    class Equipment {
+        - isDamaged: Boolean
+        - {static} cnt: int = 0
+        - id: int
+        - location: Location
+        + Equipment(location: Location)
+        + getId(): int
+        + isAvailable(): boolean
+        + getLocation(): Location
+        + setLocation(location: Location): void
+        + fix(): void
+        + damage(): void
+    }
+
+    enum ResourceType {
+        OXYGEN
+        WATER
+        FOOD
+        FUEL
+        BATTERY
+        MEDICAL
+        SPARE_PARTS
+    }
+}
+
+' --- RELATIONSHIPS ---
+Facility o-- "0..*" Equipment : houses / equipmentList >
+Facility ..> ResourceType : allocates / tracks >
+
+@enduml
