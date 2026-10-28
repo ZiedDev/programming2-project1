@@ -21,8 +21,8 @@ import marsops.resource.ResourceType;
 public class Main {
 
     private static void setupColony(Colony colony) {
-        Habitat habitat = new Habitat("Alpha Base", 100);
-        StorageFacility storage = new StorageFacility("Main Depot", 500);
+        Habitat habitat = new Habitat("Shibuya", 100);
+        StorageFacility storage = new StorageFacility("Smouha", 500);
         Map<ResourceType, Integer> habRes = new HashMap<>();
         habRes.put(ResourceType.OXYGEN, 300);
         habRes.put(ResourceType.WATER, 100);
@@ -35,8 +35,8 @@ public class Main {
         storage.addResources(storageResources);
         colony.getFacilityManager().addFacility(habitat);
         colony.getFacilityManager().addFacility(storage);
-        colony.getAgentManager().createAgent(Scientist.class, habitat, "Dr. Alice", "S-01");
-        colony.getAgentManager().createAgent(Engineer.class, habitat, "Bob", "E-01");
+        colony.getAgentManager().createAgent(Scientist.class, habitat, "Hesham", "10062");
+        colony.getAgentManager().createAgent(Engineer.class, habitat, "Hossam", "10010");
         colony.getAgentManager().createAgent(ExplorationRover.class, habitat);
         colony.getAgentManager().createAgent(RepairRobot.class, storage);
     }
@@ -48,13 +48,14 @@ public class Main {
         Colony colony = Colony.getInstance();
         setupColony(colony);
         colony.getPrintManager().printReports();
-        ExplorationMission mission = new ExplorationMission(2, "Gale Crater", 1, 1, 10, 0, 10, 10, 5, 5);
+        ExplorationMission mission = new ExplorationMission(2, "Tilted Towers", 1, 1, 10, 0, 10, 10, 5, 5);
         boolean accepted = colony.submitMission(mission);
         System.out.println("Mission submitted: " + accepted);
         colony.advanceTime(1);
         colony.advanceTime(1);
         colony.getPrintManager().printMissionOutcome(mission);
         colony.getPrintManager().printReports();
+        System.out.println("_________________________");
     }
 
     // Test 2: Mission Rejection (Unsuitable Agent)
@@ -64,9 +65,10 @@ public class Main {
         Colony colony = Colony.getInstance();
         setupColony(colony);
         // Submit mission requiring agents that do not exist
-        ExplorationMission mission = new ExplorationMission(2, "Chryse Planitia", 5, 5, 10, 0, 10, 10, 5, 5);
+        ExplorationMission mission = new ExplorationMission(2, "Fawzy Moaz", 5, 5, 10, 0, 10, 10, 5, 5);
         colony.submitMission(mission);
         colony.getPrintManager().printMissionOutcome(mission);
+        System.out.println("_________________________");
     }
 
     // Test 3: Resource Shortage
@@ -76,10 +78,11 @@ public class Main {
         Colony colony = Colony.getInstance();
         setupColony(colony);
         // Request impossible quantity of fuel
-        ExplorationMission mission = new ExplorationMission(2, "Valles Marineris", 1, 1, 10, 0, 99999, 10, 5, 5);
+        ExplorationMission mission = new ExplorationMission(2, "Fleming", 1, 1, 10, 0, 99999, 10, 5, 5);
         colony.submitMission(mission);
         colony.getPrintManager().printMissionOutcome(mission);
         colony.getPrintManager().printTotalResources();
+        System.out.println("_________________________");
     }
 
     // Test 4: Emergency Handling (Oxygen Leak)
@@ -93,6 +96,7 @@ public class Main {
         colony.submitEmergency(leak);
         colony.getPrintManager().printEmergencyOutcome(leak);
         colony.getPrintManager().printTotalResources();
+        System.out.println("_________________________");
     }
 
     // Test 5: Environmental Effect (Dust Storm)
@@ -103,9 +107,10 @@ public class Main {
         setupColony(colony);
         colony.setEnvironment(Environment.DUST_STORM);
         colony.getPrintManager().printEnvironment();
-        ExplorationMission mission = new ExplorationMission(2, "Acidalia Planitia", 1, 1, 10, 0, 10, 10, 5, 5);
+        ExplorationMission mission = new ExplorationMission(2, "Smart Village", 1, 1, 10, 0, 10, 10, 5, 5);
         colony.submitMission(mission);
         colony.getPrintManager().printMissionOutcome(mission);
+        System.out.println("_________________________");
     }
 
     public static void main(String[] args) {
