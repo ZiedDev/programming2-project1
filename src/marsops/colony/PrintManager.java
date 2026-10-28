@@ -1,7 +1,6 @@
 package marsops.colony;
 
 import java.util.Map;
-import java.util.Objects;
 
 import marsops.agent.Agent;
 import marsops.emergency.Emergency;
@@ -14,7 +13,7 @@ public class PrintManager {
     private Colony colony;
 
     public PrintManager(Colony colony) {
-        this.colony = Objects.requireNonNull(colony, "Colony must not be null");;
+        this.colony = colony;
     }
 
     // Print Total Resources
@@ -36,13 +35,13 @@ public class PrintManager {
 
         Mission active = colony.getActiveMission();
         if (active != null) {
-            System.out.println("Active Mission: " + active.getClass().getSimpleName() + " (" + active.getStatus() + ")");
+            System.out.println(
+                    "Active Mission: " + active.getClass().getSimpleName() + " (" + active.getStatus() + ")");
         } else {
             System.out.println("Active Mission: None");
         }
 
         System.out.println();
-
 
         System.out.println("[Agents]");
         for (Agent agent : colony.getAgents()) {

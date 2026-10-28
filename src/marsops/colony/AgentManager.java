@@ -47,7 +47,7 @@ public class AgentManager {
         } else if (type == Scientist.class) {
             newAgent = new Scientist(originLocation, name, id);
         } else {
-            throw new IllegalArgumentException("Invalid agent: " + type);
+            return null;
         }
         return register(newAgent);
     }
@@ -62,9 +62,13 @@ public class AgentManager {
         } else if (type == RepairRobot.class) {
             newAgent = new RepairRobot(originLocation);
         } else {
-            throw new IllegalArgumentException("Invalid agent: " + type);
+            return null;
         }
         return register(newAgent);
+    }
+
+    public void addAgent(Agent agent) {
+        register(agent);
     }
 
     public ArrayList<Agent> getAgents() {
