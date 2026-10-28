@@ -1,0 +1,94 @@
+@startuml
+skinparam linetype ortho
+
+class AgentManager {
+- {static} agents: ArrayList<Agent> {readOnly}
+- {static} agentsCount: Map<Class<? extends Agent>, Integer> {readOnly}
+- register<T : Agent>(agent: T): T
++ createAgent(type: Class<? extends Human>, originLocation: Facility, name: String, id: String): Human
++ createAgent(type: Class<? extends Robot>, originLocation: Facility): Robot
++ addAgent(agent: Agent): void
++ getAgents(): ArrayList<Agent>
++ canProvide(mission: Mission): boolean
++ canProvide(emergency: Emergency): boolean
++ provide(mission: Mission): ArrayList<Agent>
++ release(mission: Mission): void
++ rescue(mission: Mission): void
++ relocate(agent: Agent, location: Location): void
++ relocate(agents: ArrayList<Agent>, location: Location): void
++ advanceTime(timeUnit: int): void
+}
+
+AgentManager "1" o-- "*" Agent
+
+abstract class Agent {
+- originLocation: Facility {readOnly}
+- currentLocation: Location
+- isAvailable: boolean
+- health: int
+- assignedMission: Mission
+
++ setAvailable(available: boolean): void
++ setAssignedMission(assignedMission: Mission): void
+
++ getCurrentLocation(): Location
++ isAvailable(): boolean
++ getAssignedMission(): Mission
+
++ canPerform(mission: Mission): boolean
++ canHandle(emergency: Emergency): boolean
+}
+
+abstract class Human extends Agent {
+- {static} FATIGUE_MAX: int = 100 {readOnly}
+- {static} FATIGUE_MIN: int = 0 {readOnly}
+- id: String {readOnly}
+- name: String {readOnly}
+- fatigue: int
+
++ reduceFatigue(timeUnit: int): void
++ increaseFatigue(timeUnit: int): void
++ updateFatigue(timeUnit: int): void
++ canPerform(mission: Mission): boolean
++ canHandle(emergency: Emergency): boolean
++ advanceTime(timeUnit: int): void
+}
+
+class Engineer extends Human {
++ canPerform(mission: Mission): boolean
+}
+
+class MedicalOfficer extends Human {
++ canPerform(mission: Mission): boolean
+}
+
+class Scientist extends Human {
++ canPerform(mission: Mission): boolean
+}
+
+abstract class Robot extends Agent {
+- {static} BATTERY_LEVEL_MAX: int = 100 {readOnly}
+- {static} BATTERY_LEVEL_MIN: int = 0 {readOnly}
+- batteryLevel: int
+
++ reduceBatteryLevel(timeUnit: int): void
++ increaseBatteryLevel(timeUnit: int): void
++ updateBatteryLevel(timeUnit: int): void
++ canPerform(mission: Mission): boolean
++ canHandle(emergency: Emergency): boolean
++ advanceTime(timeUnit: int): void
+}
+
+class Drone extends Robot {
++ canPerform(mission: Mission): boolean
+}
+
+class ExplorationRover extends Robot {
++ canPerform(mission: Mission): boolean
+}
+
+class RepairRobot extends Robot {
++ canPerform(mission: Mission): boolean
+}
+
+@enduml
