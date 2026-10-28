@@ -20,7 +20,9 @@ public class FacilityManager {
         facilityList.add(x);
         return;
     }
-
+    public List<Facility> getFacilities(){
+        return this.facilityList;
+    }
     public Map<ResourceType, Integer> getTotalResources() {
         Map<ResourceType, Integer> ans = new HashMap<>();
         for (Facility x : facilityList) {
