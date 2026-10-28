@@ -10,7 +10,7 @@ public class Human extends Agent {
     static final int FATIGUE_MIN = 0;
 
     private final String id;
-    private String name;
+    private final String name;
     private int fatigue;
 
     public Human(Facility originLocation, String name, String id) {

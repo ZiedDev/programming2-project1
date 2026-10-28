@@ -18,24 +18,24 @@ import marsops.resource.ResourceType;
 public class Main {
 
     private static void setupColony(Colony colony) {
-        Habitat hab = new Habitat("Alpha Base", 100);
+        Habitat habitat = new Habitat("Alpha Base", 100);
         StorageFacility storage = new StorageFacility("Main Depot", 500);
         Map<ResourceType, Integer> habRes = new HashMap<>();
         habRes.put(ResourceType.OXYGEN, 300);
         habRes.put(ResourceType.WATER, 100);
         habRes.put(ResourceType.FOOD, 100);
-        hab.addResources(habRes);
-        Map<ResourceType, Integer> storRes = new HashMap<>();
-        storRes.put(ResourceType.BATTERY, 200);
-        storRes.put(ResourceType.FUEL, 200);
-        storRes.put(ResourceType.SPARE_PARTS, 50);
-        storage.addResources(storRes);
-        colony.addFacility(hab);
-        colony.addFacility(storage);
-        colony.createHuman(AgentTypes.SCIENTIST, hab, "Dr. Alice", "S-01");
-        colony.createHuman(AgentTypes.ENGINEER, hab, "Bob", "E-01");
-        colony.createRobot(AgentTypes.EXPLORATION_ROVER, hab);
-        colony.createRobot(AgentTypes.REPAIR_ROBOT, storage);
+        habitat.addResources(habRes);
+        Map<ResourceType, Integer> storageResources = new HashMap<>();
+        storageResources.put(ResourceType.BATTERY, 200);
+        storageResources.put(ResourceType.FUEL, 200);
+        storageResources.put(ResourceType.SPARE_PARTS, 50);
+        storage.addResources(storageResources);
+        colony.getFacilityManager().addFacility(habitat);
+        colony.getFacilityManager().addFacility(storage);
+        colony.getAgentManager().createAgent(AgentTypes.SCIENTIST, habitat, "Dr. Alice", "S-01");
+        colony.getAgentManager().createAgent(AgentTypes.ENGINEER, habitat, "Bob", "E-01");
+        colony.getAgentManager().createAgent(AgentTypes.EXPLORATION_ROVER, habitat);
+        colony.getAgentManager().createAgent(AgentTypes.REPAIR_ROBOT, storage);
     }
 
     // Test 1: Successful Exploration
@@ -85,7 +85,7 @@ public class Main {
         Colony.resetInstance();
         Colony colony = Colony.getInstance();
         setupColony(colony);
-        Habitat hab = (Habitat) colony.getFacilities().get(0);
+        Habitat hab = (Habitat) colony.getFacilityManager().getFacilities().getFirst();
         OxygenLeakEmergency leak = new OxygenLeakEmergency(hab, 50, 1, 1, 2);
         colony.submitEmergency(leak);
         colony.getPrintManager().printEmergencyOutcome(leak);

@@ -73,7 +73,7 @@ public class Colony {
             rejectMission(mission, "Surface operations are not allowed during a dust storm.");
             return false;
         }
-        // check if mission is com dependent and theres com disruption
+        // check if mission is com dependent and there's com disruption
         if (this.environment == Environment.COMM_DISRUPTION && mission.isCommunicationDependent()) {
             rejectMission(mission,
                     "Communication-dependent operations are not allowed during communication disruption.");
@@ -168,6 +168,14 @@ public class Colony {
 
     public List<Emergency> getPastEmergencies() {
         return this.pastEmergencies;
+    }
+
+    public AgentManager getAgentManager() {
+        return agentManager;
+    }
+
+    public FacilityManager getFacilityManager() {
+        return facilityManager;
     }
 
     public Environment getEnvironment() {
