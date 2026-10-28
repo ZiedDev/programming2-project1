@@ -36,24 +36,24 @@ public class Human extends Agent {
         this.fatigue = fatigue;
     }
 
-    public void reduceFatigue(int time_unit) {
-        this.fatigue = Math.max(this.fatigue - time_unit, FATIGUE_MIN);
+    public void reduceFatigue(int timeUnit) {
+        this.fatigue = Math.max(this.fatigue - timeUnit, FATIGUE_MIN);
     }
 
-    public void increaseFatigue(int time_unit) {
-        this.fatigue = Math.min(this.fatigue + time_unit, FATIGUE_MAX);
+    public void increaseFatigue(int timeUnit) {
+        this.fatigue = Math.min(this.fatigue + timeUnit, FATIGUE_MAX);
     }
 
-    public void updateFatigue(int time_unit) {
+    public void updateFatigue(int timeUnit) {
         if (this.getAssignedMission() != null) {
             int time_left = this.getAssignedMission().getDuration() - this.getAssignedMission().getElapsed();
-            increaseFatigue(Math.min(time_left, time_unit));
+            increaseFatigue(Math.min(time_left, timeUnit));
 
-            if (time_unit > time_left) {
-                reduceFatigue(time_unit - time_left);
+            if (timeUnit > time_left) {
+                reduceFatigue(timeUnit - time_left);
             }
         } else {
-            reduceFatigue(time_unit);
+            reduceFatigue(timeUnit);
         }
     }
 
@@ -72,7 +72,7 @@ public class Human extends Agent {
     }
 
     @Override
-    public void advanceTime(int time_unit) {
-        updateFatigue(time_unit);
+    public void advanceTime(int timeUnit) {
+        updateFatigue(timeUnit);
     }
 }

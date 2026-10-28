@@ -6,7 +6,7 @@ import marsops.facility.Location;
 import marsops.mission.Mission;
 
 public abstract class Agent {
-    private Facility originLocation;
+    private final Facility originLocation;
     private Location currentLocation;
     private boolean isAvailable;
     private int health;
@@ -21,10 +21,6 @@ public abstract class Agent {
     }
 
     // setters
-    public void setOriginLocation(Facility originLocation) {
-        this.originLocation = originLocation;
-    }
-
     public void setCurrentLocation(Location currentLocation) {
         this.currentLocation = currentLocation;
     }
@@ -70,5 +66,5 @@ public abstract class Agent {
         return isAvailable;
     }
 
-    public abstract void advanceTime(int time_unit);
+    public abstract void advanceTime(int timeUnit);
 }

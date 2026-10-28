@@ -142,8 +142,8 @@ public class Colony {
         this.pastMissions.add(mission);
     }
 
-    public void advanceTime(int time_unit) {
-        this.agentManager.advanceTime(time_unit);
+    public void advanceTime(int timeUnit) {
+        this.agentManager.advanceTime(timeUnit);
         if (this.activeMission != null) {
             if (this.environment == Environment.DUST_STORM && this.activeMission instanceof ExplorationMission) {
                 this.activeMission.fail("Mission failed due to a dust storm.");
@@ -152,7 +152,7 @@ public class Colony {
                 this.activeMission.fail("Mission failed due to communication disruption.");
             }
             else {
-                this.activeMission.tick(time_unit);
+                this.activeMission.tick(timeUnit);
             }
             if (this.activeMission.getStatus() == MissionStatus.COMPLETED || this.activeMission.getStatus() == MissionStatus.FAILED) {
                 addCompletedMission(this.activeMission);

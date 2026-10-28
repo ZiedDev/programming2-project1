@@ -210,9 +210,9 @@ public class AgentManager {
         }
     }
 
-    public void advanceTime(int time_unit) {
+    public void advanceTime(int timeUnit) {
         for (Agent agent : agents) {
-            agent.advanceTime(time_unit);
+            agent.advanceTime(timeUnit);
         }
     }
 }
