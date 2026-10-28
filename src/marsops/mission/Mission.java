@@ -8,15 +8,15 @@ import marsops.facility.Location;
 import marsops.resource.ResourceType;
 
 public abstract class Mission {
-    protected int duration;
-    protected int elapsed;
+    private final int duration;
+    private int elapsed;
     protected int requiredEquipment;
     private boolean isCommunicationDependent;
-    protected MissionStatus status;
+    private MissionStatus status;
     protected String failureReason;
-    protected Map<ResourceType, Integer> requiredResources;
-    protected Map<Class<? extends Agent>, Integer> requiredAgents;
-    protected ArrayList<Agent> assignedAgents;
+    private final Map<ResourceType, Integer> requiredResources;
+    protected final Map<Class<? extends Agent>, Integer> requiredAgents;
+    private ArrayList<Agent> assignedAgents;
     protected Location targetLocation;
     protected Agent targetAgent;
 
@@ -25,7 +25,7 @@ public abstract class Mission {
     }
 
     public Mission(int duration) {
-        this.duration = duration;
+        this.duration = Math.max(1, duration);
         this.elapsed = 0;
         this.isCommunicationDependent = false;
         this.status = null;
@@ -36,14 +36,10 @@ public abstract class Mission {
         this.assignedAgents = new ArrayList<>();
     }
 
-    // TODO: abstract as this is extremely unreadable cuz i failed to see that it
-    // sets failureReason in the overrides
-    public boolean validateRequirements() {
-        return true;
-    }
+    public abstract boolean validateRequirements();
 
     public void assignAgents(ArrayList<Agent> agents) {
-        this.assignedAgents = new ArrayList<>(agents);
+        this.assignedAgents = (agents != null) ? new ArrayList<>(agents) : new ArrayList<>();
         this.status = MissionStatus.ASSIGNED;
     }
 

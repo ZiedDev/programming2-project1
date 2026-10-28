@@ -34,7 +34,7 @@ public class RescueMission extends Mission {
             int requiredFuelCount) {
         super(duration);
         this.strandedAgent = null;
-        this.targetLocation = (targetRegion != null) ? new SurfaceLocation(targetRegion) : null;
+        this.targetLocation = (targetRegion != null && !targetRegion.isBlank()) ? new SurfaceLocation(targetRegion) : null;
         this.setCommunicationDependent(true);
 
         this.requiredAgents.put(ExplorationRover.class, Math.max(1, requiredRoverCount));

@@ -23,7 +23,11 @@ public class MedicalEmergency extends Emergency {
 
     @Override
     public boolean validateRequirements() {
-        if (!treatmentFacility.isAvailable()) {
+        if (this.patient == null) {
+            this.failureReason = "No patient specified for medical emergency.";
+            return false;
+        }
+        if (this.treatmentFacility == null || !treatmentFacility.isAvailable()) {
             this.failureReason = "Treatment facility is unavailable or non-operational.";
             return false;
         }

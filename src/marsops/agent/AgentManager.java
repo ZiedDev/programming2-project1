@@ -11,6 +11,7 @@ import marsops.agent.robot.Drone;
 import marsops.agent.robot.ExplorationRover;
 import marsops.agent.robot.RepairRobot;
 import marsops.agent.robot.Robot;
+import marsops.emergency.Emergency;
 import marsops.facility.Facility;
 import marsops.facility.Location;
 import marsops.mission.Mission;
@@ -75,6 +76,35 @@ public class AgentManager {
             int capableCount = 0;
             for (Agent agent : agents) {
                 if (agent.getClass().equals(agentClass) && agent.canPerform(mission)) {
+                    capableCount++;
+                }
+            }
+
+            if (capableCount < neededCount) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean canProvide(Emergency emergency) {
+        if (agents.isEmpty()) {
+            return false;
+        }
+
+        Map<Class<? extends Agent>, Integer> required = emergency.getRequiredAgents();
+        for (Class<? extends Agent> agentClass : required.keySet()) {
+            int neededCount = required.get(agentClass);
+            int totalOwnedCount = agentsCount.getOrDefault(agentClass, 0);
+
+            if (totalOwnedCount < neededCount) {
+                return false;
+            }
+
+            int capableCount = 0;
+            for (Agent agent : agents) {
+                if (agent.getClass().equals(agentClass) && agent.canHandle(emergency)) {
                     capableCount++;
                 }
             }

@@ -13,7 +13,7 @@ public class ExplorationMission extends Mission {
             int requiredWater, int requiredFood) {
         super(duration);
         this.region = region;
-        this.targetLocation = new SurfaceLocation(region);
+        this.targetLocation = (region != null && !region.isBlank()) ? new SurfaceLocation(region) : null;
         this.requiredEquipment = requiredEquipmentCount;
 
         this.requiredAgents.put(ExplorationRover.class, Math.max(1, requiredRoverCount));
@@ -23,6 +23,15 @@ public class ExplorationMission extends Mission {
         this.addRequiredResource(ResourceType.OXYGEN, requiredOxygen);
         this.addRequiredResource(ResourceType.WATER, requiredWater);
         this.addRequiredResource(ResourceType.FOOD, requiredFood);
+    }
+
+    @Override
+    public boolean validateRequirements() {
+        if (this.region == null || this.region.isBlank()) {
+            this.failureReason = "No valid region specified for exploration.";
+            return false;
+        }
+        return true;
     }
 
     public String getRegion() {

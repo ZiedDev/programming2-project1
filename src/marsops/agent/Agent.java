@@ -66,11 +66,9 @@ public abstract class Agent {
         return isAvailable;
     }
 
-    public void canHandle(Emergency emergency) {
-        // awaiting emergencies help
+    public boolean canHandle(Emergency emergency) {
+        return isAvailable;
     }
 
-    public void advanceTime(int time_unit) {
-        return;
-    }
+    public abstract void advanceTime(int time_unit);
 }

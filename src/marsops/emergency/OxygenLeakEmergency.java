@@ -33,6 +33,19 @@ public class OxygenLeakEmergency extends Emergency {
     }
 
     @Override
+    public boolean validateRequirements() {
+        if (this.affectedHabitat == null || !this.affectedHabitat.isAvailable()) {
+            this.failureReason = "Affected habitat is invalid or non-operational.";
+            return false;
+        }
+        if (this.oxygenLoss < 0) {
+            this.failureReason = "Oxygen loss amount cannot be negative.";
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public void fail(String reason) {
         super.fail(reason);
         applyOxygenLoss();

@@ -2,7 +2,6 @@ package marsops.emergency;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import marsops.agent.Agent;
 import marsops.facility.Location;
 import marsops.resource.ResourceType;
@@ -24,10 +23,7 @@ public abstract class Emergency {
         this.requiredResources = new HashMap<>();
     }
 
-    // TODO: abstract
-    public boolean validateRequirements() {
-        return true;
-    }
+    public abstract boolean validateRequirements();
 
     public String getFailureReason() {
         return this.failureReason;

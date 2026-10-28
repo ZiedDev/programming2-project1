@@ -1,6 +1,7 @@
 package marsops.agent.human;
 
 import marsops.agent.Agent;
+import marsops.emergency.Emergency;
 import marsops.facility.Facility;
 import marsops.mission.Mission;
 
@@ -61,6 +62,13 @@ public class Human extends Agent {
         if (!super.isAvailable())
             return false;
         return fatigue + mission.getDuration() < FATIGUE_MAX;
+    }
+
+    @Override
+    public boolean canHandle(Emergency emergency) {
+        if (!super.isAvailable())
+            return false;
+        return fatigue < FATIGUE_MAX;
     }
 
     @Override

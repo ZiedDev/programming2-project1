@@ -22,6 +22,15 @@ public class RoverBreakdownEmergency extends Emergency {
     }
 
     @Override
+    public boolean validateRequirements() {
+        if (this.damagedRover == null) {
+            this.failureReason = "No damaged exploration rover specified.";
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public void resolve() {
         super.resolve();
         damagedRover.setHealth(100);

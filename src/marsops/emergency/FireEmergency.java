@@ -26,6 +26,15 @@ public class FireEmergency extends Emergency {
     }
 
     @Override
+    public boolean validateRequirements() {
+        if (this.affectedLaboratory == null || !this.affectedLaboratory.isAvailable()) {
+            this.failureReason = "Affected laboratory is invalid or already non-operational.";
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public void fail(String reason) {
         super.fail(reason);
         affectedLaboratory.setAvailability(false);

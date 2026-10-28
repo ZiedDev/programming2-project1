@@ -28,7 +28,7 @@ public class RepairMission extends Mission {
             int requiredRepairBotCount, int requiredBatteryCount, int requiredSparePartsCount) {
         super(duration);
         this.damagedEquipment = damagedEquipment;
-        this.targetLocation = damagedEquipment.getLocation();
+        this.targetLocation = (damagedEquipment != null) ? damagedEquipment.getLocation() : null;
         this.damagedFacility = null;
         this.requiredAgents.put(RepairRobot.class, Math.max(1, requiredRepairBotCount));
         this.requiredAgents.put(Engineer.class, Math.max(1, requiredEngineerCount));

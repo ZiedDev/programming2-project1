@@ -1,17 +1,17 @@
 package marsops.colony;
 
-import marsops.resource.ResourceType;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import marsops.mission.Mission;
-import marsops.resource.resourceAllocationPolicy;
 import marsops.emergency.Emergency;
 import marsops.facility.Facility;
+import marsops.mission.Mission;
+import marsops.resource.ResourceType;
+import marsops.resource.resourceAllocationPolicy;
 
 public class FacilityManager {
-    private List<Facility> facilityList;
+    private final List<Facility> facilityList;
 
     public FacilityManager() {
         facilityList = new ArrayList<>();
@@ -19,7 +19,6 @@ public class FacilityManager {
 
     public void addFacility(Facility x) {
         facilityList.add(x);
-        return;
     }
     public List<Facility> getFacilities(){
         return this.facilityList;

@@ -11,6 +11,7 @@ public class ResearchMission extends Mission {
             int requiredSparePartsCount, int requiredEquipmentCount) {
         super(duration);
         this.laboratory = laboratory;
+        this.targetLocation = laboratory;
         this.requiredEquipment = requiredEquipmentCount;
         this.requiredAgents.put(Scientist.class, Math.max(1, requiredScientistCount));
         this.addRequiredResource(ResourceType.BATTERY, requiredBatteryCount);
@@ -19,14 +20,14 @@ public class ResearchMission extends Mission {
 
     @Override
     public boolean validateRequirements() {
-        if (this.laboratory == null) {
+        if (this.laboratory == null || !this.laboratory.isAvailable()) {
             this.failureReason = "No laboratory found to use for research.";
             return false;
         }
         return true;
     }
 
-    public Laboratory geLaboratory() {
+    public Laboratory getLaboratory() {
         return this.laboratory;
     }
 }

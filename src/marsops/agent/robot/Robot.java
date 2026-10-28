@@ -1,6 +1,7 @@
 package marsops.agent.robot;
 
 import marsops.agent.Agent;
+import marsops.emergency.Emergency;
 import marsops.facility.Facility;
 import marsops.mission.Mission;
 
@@ -49,6 +50,13 @@ public class Robot extends Agent {
         if (!super.isAvailable())
             return false;
         return (batteryLevel - mission.getDuration()) >= BATTERY_LEVEL_MIN;
+    }
+
+    @Override
+    public boolean canHandle(Emergency emergency) {
+        if (!super.isAvailable())
+            return false;
+        return batteryLevel > BATTERY_LEVEL_MIN;
     }
 
     @Override

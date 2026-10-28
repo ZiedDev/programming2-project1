@@ -2,7 +2,6 @@ package marsops.colony;
 
 import java.util.ArrayList;
 import java.util.List;
-import marsops.agent.Agent;
 import marsops.agent.AgentManager;
 import marsops.emergency.Emergency;
 import marsops.mission.ExplorationMission;
@@ -14,18 +13,18 @@ import marsops.mission.MissionStatus;
  */
 public class Colony {
 
+    private static Colony instance;
+
     private Mission activeMission;
     private Environment environment;
-    private List<Mission> pastMissions;
-    private List<Emergency> pastEmergencies;
+    private final List<Mission> pastMissions;
+    private final List<Emergency> pastEmergencies;
 
-    // TODO: public -> private + delegates
-    public AgentManager agentManager;
-    public FacilityManager facilityManager;
+    private final AgentManager agentManager;
+    private final FacilityManager facilityManager;
     private final PrintManager printManager;
 
-    // TODO: singleton?
-    public Colony() {
+    private Colony() {
         this.environment = Environment.NORMAL;
         this.activeMission = null;
         this.pastMissions = new ArrayList<>();
@@ -33,6 +32,17 @@ public class Colony {
         this.agentManager = new AgentManager();
         this.facilityManager = new FacilityManager();
         this.printManager = new PrintManager(this);
+    }
+
+    public static Colony getInstance() {
+        if (instance == null) {
+            instance = new Colony();
+        }
+        return instance;
+    }
+
+    public static void resetInstance() {
+        instance = new Colony();
     }
 
     public boolean submitMission(Mission mission) {
@@ -55,19 +65,19 @@ public class Colony {
                     "Communication-dependent operations are not allowed during communication disruption.");
             return false;
         }
+        // check mission internal validity
+        if (!mission.validateRequirements()) {
+            rejectMission(mission, mission.getFailureReason());
+            return false;
+        }
         // check agents
         if (!this.agentManager.canProvide(mission)) {
-            rejectMission(mission, "Agents unavailable.");
+            rejectMission(mission, "Required agents are unavailable or do not possess the required capability.");
             return false;
         }
         // check resources
         if (!this.facilityManager.canProvide(mission)) {
             rejectMission(mission, "Resources unavailable.");
-            return false;
-        }
-        // check mission internal validity
-        if (!mission.validateRequirements()) {
-            rejectMission(mission, mission.getFailureReason());
             return false;
         }
         // valid mission yippie
@@ -82,13 +92,11 @@ public class Colony {
             return false;
         }
         // check agents
-        // TODO: overload to accept emergency too
         if (!this.agentManager.canProvide(emergency)) {
             rejectEmergency(emergency, "Agents unavailable.");
             return false;
         }
         // check resources
-        // TODO: overload to accept emergency too
         if (!this.facilityManager.canProvide(emergency)) {
             rejectEmergency(emergency, "Resources unavailable.");
             return false;
@@ -116,8 +124,7 @@ public class Colony {
         this.pastEmergencies.add(emergency);
     }
 
-    // TODO: why public method?
-    public void addCompletedMission(Mission mission) {
+    private void addCompletedMission(Mission mission) {
         this.pastMissions.add(mission);
     }
 
