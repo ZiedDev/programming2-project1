@@ -2,6 +2,7 @@ package marsops.colony;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import marsops.agent.Agent;
@@ -22,17 +23,22 @@ import marsops.mission.RescueMission;
 
 public class AgentManager {
     private final ArrayList<Agent> agents;
-    private final Map<Class<? extends Agent>, Integer> agentsCount;
+    private final Map<Class<? extends Agent>, List<Agent>> groupedAgents;
 
     public AgentManager() {
         this.agents = new ArrayList<>();
-        this.agentsCount = new HashMap<>();
+        this.groupedAgents = new HashMap<>();
     }
 
     private <T extends Agent> T register(T agent) {
         if (agent != null) {
             agents.add(agent);
-            agentsCount.merge(agent.getClass(), 1, Integer::sum);
+
+            Class<? extends Agent> agentClass = agent.getClass();
+            if (!groupedAgents.containsKey(agentClass)) {
+                groupedAgents.put(agentClass, new ArrayList<>());
+            }
+            groupedAgents.get(agentClass).add(agent);
         }
         return agent;
     }
@@ -83,15 +89,16 @@ public class AgentManager {
         Map<Class<? extends Agent>, Integer> required = mission.getRequiredAgents();
         for (Class<? extends Agent> agentClass : required.keySet()) {
             int neededCount = required.get(agentClass);
-            int totalOwnedCount = agentsCount.getOrDefault(agentClass, 0);
 
-            if (totalOwnedCount < neededCount) {
+            List<Agent> availableAgents = groupedAgents.getOrDefault(agentClass, new ArrayList<>());
+
+            if (availableAgents.size() < neededCount) {
                 return false;
             }
 
             int capableCount = 0;
-            for (Agent agent : agents) {
-                if (agent.getClass().equals(agentClass) && agent.canPerform(mission)) {
+            for (Agent agent : availableAgents) {
+                if (agent.canPerform(mission)) {
                     capableCount++;
                 }
             }
@@ -112,15 +119,16 @@ public class AgentManager {
         Map<Class<? extends Agent>, Integer> required = emergency.getRequiredAgents();
         for (Class<? extends Agent> agentClass : required.keySet()) {
             int neededCount = required.get(agentClass);
-            int totalOwnedCount = agentsCount.getOrDefault(agentClass, 0);
 
-            if (totalOwnedCount < neededCount) {
+            List<Agent> availableAgents = groupedAgents.getOrDefault(agentClass, new ArrayList<>());
+
+            if (availableAgents.size() < neededCount) {
                 return false;
             }
 
             int capableCount = 0;
-            for (Agent agent : agents) {
-                if (agent.getClass().equals(agentClass) && agent.canHandle(emergency)) {
+            for (Agent agent : availableAgents) {
+                if (agent.canHandle(emergency)) {
                     capableCount++;
                 }
             }
@@ -139,28 +147,28 @@ public class AgentManager {
         }
 
         ArrayList<Agent> agentsToProvide = new ArrayList<>();
-        Map<Class<? extends Agent>, Integer> requiredAgentType = mission.getRequiredAgents();
+        Map<Class<? extends Agent>, Integer> required = mission.getRequiredAgents();
 
-        for (Class<? extends Agent> agentType : requiredAgentType.keySet()) {
-            int neededCount = requiredAgentType.get(agentType);
+        for (Class<? extends Agent> agentClass : required.keySet()) {
+            int neededCount = required.get(agentClass);
 
-            for (Agent agent : agents) {
+            List<Agent> availableAgents = groupedAgents.getOrDefault(agentClass, new ArrayList<>());
+
+            for (Agent agent : availableAgents) {
                 if (neededCount == 0) {
                     break;
                 }
 
-                if (!agent.getClass().equals(agentType) || !agent.canPerform(mission)) {
-                    continue;
-                }
+                if (agent.canPerform(mission)) {
+                    agentsToProvide.add(agent);
+                    agent.setAvailable(false);
+                    agent.setAssignedMission(mission);
+                    if (mission.getTargetLocation() != null) {
+                        relocate(agent, mission.getTargetLocation());
+                    }
 
-                agentsToProvide.add(agent);
-                agent.setAvailable(false);
-                agent.setAssignedMission(mission);
-                if (mission.getTargetLocation() != null) {
-                    relocate(agent, mission.getTargetLocation());
+                    neededCount--;
                 }
-
-                neededCount--;
             }
         }
 
