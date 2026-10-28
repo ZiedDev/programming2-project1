@@ -1,0 +1,156 @@
+@startuml MarsOps_Emergency_Class_Diagram
+
+skinparam monochrome false
+skinparam classFontStyle bold
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+title MarsOps - Emergency Class Diagram
+
+package "marsops.colony" {
+    class Colony {
+        - pastEmergencies: List<Emergency>
+        - agentManager: AgentManager
+        - facilityManager: FacilityManager
+        + submitEmergency(emergency: Emergency): boolean
+        - rejectEmergency(emergency: Emergency, reason: String): void
+        + getPastEmergencies(): List<Emergency>
+    }
+
+    class AgentManager {
+        + canProvide(emergency: Emergency): boolean
+    }
+
+    class FacilityManager {
+        + canProvide(emergency: Emergency): boolean
+        + provide(emergency: Emergency): void
+    }
+}
+
+package "marsops.emergency" {
+
+    enum EmergencyStatus {
+        RESOLVED
+        UNRESOLVED
+    }
+
+    abstract class Emergency {
+        # status: EmergencyStatus
+        # failureReason: String
+        # location: Location
+        # requiredAgents: Map<Class<? extends Agent>, Integer>
+        # requiredResources: Map<ResourceType, Integer>
+        + Emergency(location: Location)
+        + {abstract} validateRequirements(): boolean
+        + getFailureReason(): String
+        + resolve(): void
+        + fail(reason: String): void
+        + getRequiredAgents(): Map<Class<? extends Agent>, Integer>
+        + getRequiredResources(): Map<ResourceType, Integer>
+        + addRequiredResource(type: ResourceType, amount: int): void
+    }
+
+    together {
+        class OxygenLeakEmergency extends Emergency {
+            - affectedHabitat: Habitat
+            - oxygenLoss: int
+            + OxygenLeakEmergency(affectedHabitat: Habitat, oxygenLoss: int, requiredEngineerCount: int, requiredRepairBotCount: int, requiredSparePartsCount: int)
+            - applyOxygenLoss(): void
+            + validateRequirements(): boolean
+            + fail(reason: String): void
+        }
+
+        class FireEmergency extends Emergency {
+            - affectedLaboratory: Laboratory
+            + FireEmergency(affectedLaboratory: Laboratory, requiredWaterCount: int, requiredMedicalSuppliesCount: int)
+            + validateRequirements(): boolean
+            + fail(reason: String): void
+        }
+
+        class RoverBreakdownEmergency extends Emergency {
+            - damagedRover: ExplorationRover
+            + RoverBreakdownEmergency(damagedRover: ExplorationRover, requiredSparePartsCount: int)
+            + validateRequirements(): boolean
+            + resolve(): void
+        }
+
+        class MedicalEmergency extends Emergency {
+            - patient: Human
+            - treatmentFacility: Facility
+            + MedicalEmergency(patient: Human, treatmentFacility: Facility, requiredMedicalSuppliesCount: int)
+            + validateRequirements(): boolean
+            + resolve(): void
+        }
+    }
+}
+
+package "marsops.facility" {
+    abstract class Location {
+        # location: String
+        + Location(location: String)
+    }
+
+    abstract class Facility extends Location {
+        + setAvailability(state: boolean): void
+        + isAvailable(): boolean
+        + deductResource(amount: int, resource: ResourceType): int
+    }
+
+    class Habitat extends Facility {
+        + Habitat(location: String, capacity: int)
+    }
+
+    class Laboratory extends Facility {
+        + Laboratory(location: String, capacity: int)
+    }
+}
+
+package "marsops.agent" {
+    abstract class Agent {
+        + canHandle(emergency: Emergency): boolean
+    }
+
+    abstract class Human extends Agent {
+        + setHealth(health: int): void
+        + setFatigue(fatigue: int): void
+    }
+
+    class ExplorationRover extends Agent {
+        + setHealth(health: int): void
+        + setBatteryLevel(batteryLevel: int): void
+        + setAvailable(available: boolean): void
+    }
+}
+
+package "marsops.resource" {
+    enum ResourceType {
+        OXYGEN
+        WATER
+        FOOD
+        FUEL
+        BATTERY
+        MEDICAL
+        SPARE_PARTS
+    }
+}
+
+' --- RELATIONSHIPS ---
+Colony o-- "0..*" Emergency : pastEmergencies >
+Colony ..> AgentManager : coordinates >
+Colony ..> FacilityManager : coordinates >
+
+AgentManager ..> Emergency : checks / canProvide >
+FacilityManager ..> Emergency : checks & provides >
+
+Emergency --> "1" EmergencyStatus : status >
+Emergency --> "1" Location : location >
+Emergency ..> ResourceType : requires >
+Emergency ..> Agent : requires >
+
+OxygenLeakEmergency --> "1" Habitat : affectedHabitat >
+FireEmergency --> "1" Laboratory : affectedLaboratory >
+RoverBreakdownEmergency --> "1" ExplorationRover : damagedRover >
+MedicalEmergency --> "1" Human : patient >
+MedicalEmergency --> "1" Facility : treatmentFacility >
+
+@enduml
