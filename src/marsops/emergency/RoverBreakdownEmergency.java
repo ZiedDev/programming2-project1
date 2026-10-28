@@ -18,7 +18,10 @@ public class RoverBreakdownEmergency extends Emergency {
         this.requiredAgents.put(RepairRobot.class, 1);
         this.addRequiredResource(ResourceType.SPARE_PARTS, requiredSparePartsCount);
 
-        this.damagedRover.setAvailable(false);
+        if (this.damagedRover != null) {
+            this.damagedRover.setHealth(0);
+            this.damagedRover.setAvailable(false);
+        }
     }
 
     @Override

@@ -133,14 +133,14 @@ public class Colony {
         if (this.activeMission != null) {
             if (this.environment == Environment.DUST_STORM && this.activeMission instanceof ExplorationMission) {
                 this.activeMission.fail("Mission failed due to a dust storm.");
-            } else if (this.environment == Environment.COMM_DISRUPTION
-                    && this.activeMission.isCommunicationDependent()) {
+            }
+            else if (this.environment == Environment.COMM_DISRUPTION && this.activeMission.isCommunicationDependent()) {
                 this.activeMission.fail("Mission failed due to communication disruption.");
-            } else {
+            }
+            else {
                 this.activeMission.tick(time_unit);
             }
-            if (this.activeMission.getStatus() == MissionStatus.COMPLETED
-                    || this.activeMission.getStatus() == MissionStatus.FAILED) {
+            if (this.activeMission.getStatus() == MissionStatus.COMPLETED || this.activeMission.getStatus() == MissionStatus.FAILED) {
                 addCompletedMission(this.activeMission);
                 this.agentManager.release(this.activeMission);
                 this.activeMission = null;

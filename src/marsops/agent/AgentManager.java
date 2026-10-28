@@ -156,8 +156,10 @@ public class AgentManager {
 
         for (Agent agent : assignedAgents) {
             agent.setAvailable(true);
-            agent.setAssignedMission(null);
-            relocate(agent, agent.getOriginLocation());
+            if (agent.getHealth() > 0) {
+                agent.setAvailable(true);
+                relocate(agent, agent.getOriginLocation());
+            }
         }
         if (mission instanceof RescueMission) {
             rescue(mission);
