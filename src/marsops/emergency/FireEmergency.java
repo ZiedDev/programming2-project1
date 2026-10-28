@@ -1,9 +1,6 @@
 package marsops.emergency;
 
 import marsops.agent.human.Engineer;
-import marsops.agent.robot.RepairRobot;
-import marsops.facility.Facility;
-import marsops.facility.Habitat;
 import marsops.facility.Laboratory;
 import marsops.resource.Equipment;
 import marsops.resource.ResourceType;

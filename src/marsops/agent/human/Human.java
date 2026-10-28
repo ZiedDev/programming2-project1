@@ -9,9 +9,9 @@ public class Human extends Agent {
     static final int FATIGUE_MAX = 100;
     static final int FATIGUE_MIN = 0;
 
-    final String id;
-    String name;
-    int fatigue;
+    private final String id;
+    private String name;
+    private int fatigue;
 
     public Human(Facility originLocation, String name, String id) {
         super(originLocation);

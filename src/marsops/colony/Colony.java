@@ -2,11 +2,14 @@ package marsops.colony;
 
 import java.util.ArrayList;
 import java.util.List;
-import marsops.agent.AgentManager;
+import java.util.Map;
+
+import marsops.agent.Agent;
 import marsops.emergency.Emergency;
 import marsops.mission.ExplorationMission;
 import marsops.mission.Mission;
 import marsops.mission.MissionStatus;
+import marsops.resource.ResourceType;
 
 /**
  * Colony
@@ -44,6 +47,17 @@ public class Colony {
     public static void resetInstance() {
         instance = new Colony();
     }
+
+    // no methods to hide + easier to call that delegation
+    public PrintManager getPrintManager() {return this.printManager;}
+
+    public Map<ResourceType, Integer> getTotalResources() { return this.facilityManager.getTotalResources();}
+
+    public int getTotalEquipment() { return this.facilityManager.getTotalEquipment();}
+
+    public ArrayList<Agent> getAgents() {return this.agentManager.getAgents();}
+
+    // TODO: delegate rest of facilityManager and agentManager
 
     public boolean submitMission(Mission mission) {
         if (mission == null) {

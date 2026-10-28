@@ -1,6 +1,8 @@
 package marsops.colony;
 
 import java.util.Map;
+import java.util.Objects;
+
 import marsops.agent.Agent;
 import marsops.emergency.Emergency;
 import marsops.emergency.EmergencyStatus;
@@ -12,28 +14,22 @@ public class PrintManager {
     private Colony colony;
 
     public PrintManager(Colony colony) {
-        this.colony = colony;
+        this.colony = Objects.requireNonNull(colony, "Colony must not be null");;
     }
 
     // Print Total Resources
     public void printTotalResources() {
-        if (colony == null || colony.facilityManager == null) {
-            return;
-        }
         System.out.println("[Total Resources]");
-        Map<ResourceType, Integer> totals = colony.facilityManager.getTotalResources();
+        Map<ResourceType, Integer> totals = colony.getTotalResources();
         for (ResourceType type : ResourceType.values()) {
             System.out.println(type + ": " + totals.getOrDefault(type, 0));
         }
-        System.out.println("Equipment: " + colony.facilityManager.getTotalEquipment());
+        System.out.println("Equipment: " + colony.getTotalEquipment());
         System.out.println();
     }
 
     // Print Reports
     public void printReports() {
-        if (colony == null) {
-            return;
-        }
         System.out.println("[Colony Status Report]");
         printEnvironment();
         printTotalResources();
@@ -47,21 +43,17 @@ public class PrintManager {
 
         System.out.println();
 
-        if (colony.agentManager != null) {
-            System.out.println("[Agents]");
-            for (Agent agent : colony.agentManager.getAgents()) {
-                System.out.println(agent.getClass().getSimpleName() + " - Health: " + agent.getHealth()
-                        + " - Available: " + agent.isAvailable());
-            }
+
+        System.out.println("[Agents]");
+        for (Agent agent : colony.getAgents()) {
+            System.out.println(agent.getClass().getSimpleName() + " - Health: " + agent.getHealth()
+                    + " - Available: " + agent.isAvailable());
         }
         System.out.println();
     }
 
     // Print Environment
     public void printEnvironment() {
-        if (colony == null) {
-            return;
-        }
         System.out.println("[Environment]");
         System.out.println("Current Environment: " + colony.getEnvironment());
         if (colony.getEnvironment() == Environment.DUST_STORM) {
@@ -102,9 +94,6 @@ public class PrintManager {
     }
 
     public void printMissionAndEmergencyOutcomes() {
-        if (colony == null) {
-            return;
-        }
         System.out.println("[Mission Outcomes]");
         for (Mission mission : colony.getPastMissions()) {
             printMissionOutcome(mission);

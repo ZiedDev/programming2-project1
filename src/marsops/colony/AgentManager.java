@@ -1,8 +1,11 @@
-package marsops.agent;
+package marsops.colony;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import marsops.agent.Agent;
+import marsops.agent.AgentTypes;
 import marsops.agent.human.Engineer;
 import marsops.agent.human.Human;
 import marsops.agent.human.MedicalOfficer;
@@ -35,6 +38,7 @@ public class AgentManager {
         return agent;
     }
 
+    // TODO: i think this is bad overloading for either human or robot (finalize before delegation in colony)
     // Creating a Human
     public Human createAgent(AgentTypes type, Facility originLocation, String name, String id) {
         return register(switch (type) {

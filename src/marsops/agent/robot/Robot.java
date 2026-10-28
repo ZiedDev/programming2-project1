@@ -9,7 +9,7 @@ public class Robot extends Agent {
     static final int BATTERY_LEVEL_MAX = 100;
     static final int BATTERY_LEVEL_MIN = 0;
 
-    int batteryLevel;
+    private int batteryLevel;
 
     public Robot(Facility originLocation) {
         super(originLocation);
