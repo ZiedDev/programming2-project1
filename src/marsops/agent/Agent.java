@@ -1,5 +1,7 @@
 package marsops.agent;
 
+import java.util.List;
+
 import marsops.emergency.Emergency;
 import marsops.facility.Facility;
 import marsops.facility.Location;
@@ -19,6 +21,10 @@ public abstract class Agent {
         this.health = 100;
         this.assignedMission = null;
     }
+
+    protected abstract List<Class<? extends Mission>> getAllowedMissions();
+
+    protected abstract List<Class<? extends Emergency>> getAllowedEmergencies();
 
     // setters
     public void setCurrentLocation(Location currentLocation) {
@@ -59,11 +65,17 @@ public abstract class Agent {
     }
 
     public boolean canPerform(Mission mission) {
-        return isAvailable;
+        if (!isAvailable || mission == null) {
+            return false;
+        }
+        return getAllowedMissions().contains(mission.getClass());
     }
 
     public boolean canHandle(Emergency emergency) {
-        return isAvailable;
+        if (!isAvailable || emergency == null) {
+            return false;
+        }
+        return getAllowedEmergencies().contains(emergency.getClass());
     }
 
     public abstract void advanceTime(int timeUnit);

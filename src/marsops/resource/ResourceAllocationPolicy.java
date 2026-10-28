@@ -43,7 +43,6 @@ public final class ResourceAllocationPolicy {
         map.put(ResourceType.SPARE_PARTS, DEFAULT_PRIORITY);
         map.put(ResourceType.MEDICAL, medicalPrio);
 
-        // 3. Lock the map so it cannot be modified after startup
         PRIORITY = Collections.unmodifiableMap(map);
 
     }
@@ -59,6 +58,3 @@ public final class ResourceAllocationPolicy {
         return DEFAULT_PRIORITY;
     }
 }
-
-// this code makes use of the immutable lists and maps and getters recommended
-// by previous todo

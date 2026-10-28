@@ -5,7 +5,7 @@ import marsops.emergency.Emergency;
 import marsops.facility.Facility;
 import marsops.mission.Mission;
 
-public class Human extends Agent {
+public abstract class Human extends Agent {
     static final int FATIGUE_MAX = 100;
     static final int FATIGUE_MIN = 0;
 

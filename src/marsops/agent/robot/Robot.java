@@ -5,7 +5,7 @@ import marsops.emergency.Emergency;
 import marsops.facility.Facility;
 import marsops.mission.Mission;
 
-public class Robot extends Agent {
+public abstract class Robot extends Agent {
     static final int BATTERY_LEVEL_MAX = 100;
     static final int BATTERY_LEVEL_MIN = 0;
 

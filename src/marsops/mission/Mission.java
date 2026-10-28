@@ -134,4 +134,10 @@ public abstract class Mission {
         }
     }
 
+    public void addRequiredEquipment(int amount) {
+        if (amount > 0) {
+            this.requiredEquipment += amount;
+        }
+    }
+
 }
