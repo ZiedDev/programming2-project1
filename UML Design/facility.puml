@@ -1,18 +1,33 @@
 @startuml MarsOps_Facility_Class_Diagram
 
-skinparam classAttributeIconSize 0
 skinparam monochrome false
 skinparam classFontStyle bold
 skinparam linetype ortho
 skinparam packageStyle rectangle
 
+title MarsOps - Facility & Facility Management Class Diagram
+
+package "marsops.colony" {
+    class FacilityManager {
+        - facilityList: List<Facility>
+        + addFacility(x: Facility): void
+        + getFacilities(): List<Facility>
+        + getTotalResources(): Map<ResourceType, Integer>
+        + getTotalEquipment(): int
+        + canProvide(mission: Mission): boolean
+        + canProvide(emergency: Emergency): boolean
+        - canProvide(requiredResources: Map<ResourceType, Integer>, requiredEquipment: int): boolean
+        + provide(emergency: Emergency): void
+        + provide(mission: Mission): void
+        - provide(requiredResources: Map<ResourceType, Integer>, requiredEquipment: int): void
+    }
+}
 
 package "marsops.facility" {
 
     abstract class Location {
         # location: String
         + Location(location: String)
-        + getLocation(): String
     }
 
     class SurfaceLocation extends Location {
@@ -29,9 +44,7 @@ package "marsops.facility" {
         - totalTakenCapacity: int = 0
         # prioToAllocate: ResourceType[7]
         + Facility(location: String, capacity: int)
-        + getId(): int
         + setAvailability(state: boolean): void
-        + getCapacity(): int
         + isAvailable(): boolean
         + getResources(): Map<ResourceType, Integer>
         + getEquipment(): List<Equipment>
@@ -42,7 +55,7 @@ package "marsops.facility" {
         + addResources(resourcesToAllocate: Map<ResourceType, Integer>): Map<ResourceType, Integer>
         + deductResource(amount: int, resource: ResourceType): int
     }
-
+together{
     class Habitat extends Facility {
         + Habitat(location: String, capacity: int)
     }
@@ -62,6 +75,7 @@ package "marsops.facility" {
     class CommunicationStation extends Facility {
         + CommunicationStation(location: String, capacity: int)
     }
+  }
 }
 
 package "marsops.resource" {
@@ -71,10 +85,7 @@ package "marsops.resource" {
         - id: int
         - location: Location
         + Equipment(location: Location)
-        + getId(): int
         + isAvailable(): boolean
-        + getLocation(): Location
-        + setLocation(location: Location): void
         + fix(): void
         + damage(): void
     }
@@ -88,10 +99,32 @@ package "marsops.resource" {
         MEDICAL
         SPARE_PARTS
     }
+
+    class ResourceAllocationPolicy {
+        - {static} PRIORITY: Map<ResourceType, List<Class<? extends Facility>>>
+        - {static} DEFAULT_PRIORITY: List<Class<? extends Facility>>
+        - ResourceAllocationPolicy()
+        + {static} getPriority(resourceType: ResourceType): List<Class<? extends Facility>>
+        + {static} getEquipmentPriority(): List<Class<? extends Facility>>
+    }
 }
 
+package "marsops.mission" {
+    class Mission
+}
+
+package "marsops.emergency" {
+    class Emergency
+}
+
+
 ' --- RELATIONSHIPS ---
-Facility o-- "0..*" Equipment : houses / equipmentList >
-Facility ..> ResourceType : allocates / tracks >
+FacilityManager o-- "0..*" Facility : manages / facilityList >
+FacilityManager ..> ResourceAllocationPolicy : uses >
+FacilityManager ..> Mission : checks / provides for >
+FacilityManager ..> Emergency : checks / provides for >
+
+Facility o-- "0..*" Equipment 
+Facility ..> ResourceType 
 
 @enduml
