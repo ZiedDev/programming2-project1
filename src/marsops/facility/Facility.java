@@ -110,9 +110,8 @@ abstract public class Facility extends Location {
         return amount;
     }
 
-    public Map<ResourceType, Integer> addResources(Map<ResourceType, Integer> resourcesToAllocate) { // returns
-                                                                                                     // un-allocated
-                                                                                                     // resources
+    public Map<ResourceType, Integer> addResources(
+            Map<ResourceType, Integer> resourcesToAllocate) { // returns un-allocated resources
         for (ResourceType i : prioToAllocate) {
             if (totalTakenCapacity < capacity) {
                 int left = capacity - totalTakenCapacity;

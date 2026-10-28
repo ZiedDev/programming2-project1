@@ -5,6 +5,7 @@ import marsops.agent.robot.RepairRobot;
 import marsops.facility.Facility;
 import marsops.facility.Habitat;
 import marsops.facility.Laboratory;
+import marsops.resource.Equipment;
 import marsops.resource.ResourceType;
 
 public class FireEmergency extends Emergency {
@@ -21,8 +22,11 @@ public class FireEmergency extends Emergency {
         this.addRequiredResource(ResourceType.WATER, requiredWaterCount);
         this.addRequiredResource(ResourceType.MEDICAL, requiredMedicalSuppliesCount);
 
-        // TODO: implement randomised
-        this.affectedLaboratory.damageEquipment();
+        for (Equipment i : this.affectedLaboratory.getEquipment()) {
+            if (i.isAvailable()) {
+                i.damage();
+            }
+        }
     }
 
     @Override
