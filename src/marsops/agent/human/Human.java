@@ -16,7 +16,7 @@ public abstract class Human extends Agent {
     public Human(Facility originLocation, String name, String id) {
         super(originLocation);
         this.name = name;
-        this.id = id;
+        this.id = id; // TODO: make unique
         this.fatigue = 0;
     }
 
@@ -74,5 +74,12 @@ public abstract class Human extends Agent {
     @Override
     public void advanceTime(int timeUnit) {
         updateFatigue(timeUnit);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s - Health: %d - Available: %b - ID: %s - Name: %s - Fatigue: %d",
+                getClass().getSimpleName(),
+                getHealth(), isAvailable(), getId(), getName(), getFatigue());
     }
 }

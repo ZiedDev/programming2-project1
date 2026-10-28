@@ -63,4 +63,11 @@ public abstract class Robot extends Agent {
     public void advanceTime(int timeUnit) {
         updateBatteryLevel(timeUnit);
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "%s - Health: %d - Available: %b - Battery: %d",
+                getClass().getSimpleName(), getHealth(), isAvailable(), getBatteryLevel());
+    }
 }

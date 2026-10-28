@@ -21,7 +21,7 @@ import marsops.resource.ResourceType;
 public class Main {
 
     private static void setupColony(Colony colony) {
-        Habitat habitat = new Habitat("Shibuya", 100);
+        Habitat habitat = new Habitat("Shibuya", 500);
         StorageFacility storage = new StorageFacility("Smouha", 500);
         Map<ResourceType, Integer> habRes = new HashMap<>();
         habRes.put(ResourceType.OXYGEN, 300);

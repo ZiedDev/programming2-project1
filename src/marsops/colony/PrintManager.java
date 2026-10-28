@@ -45,8 +45,7 @@ public class PrintManager {
 
         System.out.println("[Agents]");
         for (Agent agent : colony.getAgents()) {
-            System.out.println(agent.getClass().getSimpleName() + " - Health: " + agent.getHealth()
-                    + " - Available: " + agent.isAvailable());
+            System.out.println(agent);
         }
         System.out.println();
     }

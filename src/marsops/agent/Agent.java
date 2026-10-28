@@ -79,4 +79,11 @@ public abstract class Agent {
     }
 
     public abstract void advanceTime(int timeUnit);
+
+    @Override
+    public String toString() {
+        return String.format(
+                "%s - Health: %d - Available: %b",
+                getClass().getSimpleName(), getHealth(), isAvailable());
+    }
 }
