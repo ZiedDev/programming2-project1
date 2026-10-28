@@ -5,7 +5,6 @@ import java.util.List;
 import marsops.agent.Agent;
 import marsops.agent.AgentManager;
 import marsops.emergency.Emergency;
-import marsops.facility.FacilityManager;
 import marsops.mission.ExplorationMission;
 import marsops.mission.Mission;
 import marsops.mission.MissionStatus;

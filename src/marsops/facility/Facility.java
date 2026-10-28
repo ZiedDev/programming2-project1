@@ -129,7 +129,7 @@ abstract public class Facility extends Location {
         return resourcesToAllocate;
     }
 
-    int deductResource(int amount, ResourceType resource) { // returns undeducted amount
+    public int deductResource(int amount, ResourceType resource) { // returns undeducted amount
         int toSubt = Math.min(this.resourceAmount.get(resource), amount);
         this.resourceAmount.put(resource, this.resourceAmount.get(resource) - toSubt);
         this.totalTakenCapacity -= toSubt;

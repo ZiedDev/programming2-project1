@@ -1,4 +1,4 @@
-package marsops.facility;
+package marsops.colony;
 
 import marsops.resource.ResourceType;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import java.util.Map;
 import marsops.mission.Mission;
 import marsops.resource.resourceAllocationPolicy;
 import marsops.emergency.Emergency;
+import marsops.facility.Facility;
 
 public class FacilityManager {
     private List<Facility> facilityList;
