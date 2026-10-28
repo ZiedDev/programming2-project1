@@ -128,4 +128,10 @@ public abstract class Mission {
         }
     }
 
+    public void addRequiredAgent(Class<? extends Agent> type, int amount) {
+        if (amount > 0) {
+            this.requiredAgents.put(type, this.requiredAgents.getOrDefault(type, 0) + amount);
+        }
+    }
+
 }

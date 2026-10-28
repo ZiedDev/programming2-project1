@@ -3,7 +3,10 @@ package marsops;
 import java.util.HashMap;
 import java.util.Map;
 
-import marsops.agent.AgentTypes;
+import marsops.agent.human.Engineer;
+import marsops.agent.human.Scientist;
+import marsops.agent.robot.ExplorationRover;
+import marsops.agent.robot.RepairRobot;
 import marsops.colony.Colony;
 import marsops.colony.Environment;
 import marsops.emergency.OxygenLeakEmergency;
@@ -32,10 +35,10 @@ public class Main {
         storage.addResources(storageResources);
         colony.getFacilityManager().addFacility(habitat);
         colony.getFacilityManager().addFacility(storage);
-        colony.getAgentManager().createAgent(AgentTypes.SCIENTIST, habitat, "Dr. Alice", "S-01");
-        colony.getAgentManager().createAgent(AgentTypes.ENGINEER, habitat, "Bob", "E-01");
-        colony.getAgentManager().createAgent(AgentTypes.EXPLORATION_ROVER, habitat);
-        colony.getAgentManager().createAgent(AgentTypes.REPAIR_ROBOT, storage);
+        colony.getAgentManager().createAgent(Scientist.class, habitat, "Dr. Alice", "S-01");
+        colony.getAgentManager().createAgent(Engineer.class, habitat, "Bob", "E-01");
+        colony.getAgentManager().createAgent(ExplorationRover.class, habitat);
+        colony.getAgentManager().createAgent(RepairRobot.class, storage);
     }
 
     // Test 1: Successful Exploration

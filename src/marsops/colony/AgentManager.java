@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import marsops.agent.Agent;
-import marsops.agent.AgentTypes;
 import marsops.agent.human.Engineer;
 import marsops.agent.human.Human;
 import marsops.agent.human.MedicalOfficer;
@@ -38,25 +37,34 @@ public class AgentManager {
         return agent;
     }
 
-    // TODO: i think this is bad overloading for either human or robot (finalize before delegation in colony)
     // Creating a Human
-    public Human createAgent(AgentTypes type, Facility originLocation, String name, String id) {
-        return register(switch (type) {
-            case ENGINEER -> new Engineer(originLocation, name, id);
-            case MEDICAL_OFFICER -> new MedicalOfficer(originLocation, name, id);
-            case SCIENTIST -> new Scientist(originLocation, name, id);
-            default -> null;
-        });
+    public Human createAgent(Class<? extends Human> type, Facility originLocation, String name, String id) {
+        Human newAgent;
+        if (type == Engineer.class) {
+            newAgent = new Engineer(originLocation, name, id);
+        } else if (type == MedicalOfficer.class) {
+            newAgent = new MedicalOfficer(originLocation, name, id);
+        } else if (type == Scientist.class) {
+            newAgent = new Scientist(originLocation, name, id);
+        } else {
+            throw new IllegalArgumentException("Invalid agent: " + type);
+        }
+        return register(newAgent);
     }
 
     // Creating a Robot
-    public Robot createAgent(AgentTypes type, Facility originLocation) {
-        return register(switch (type) {
-            case DRONE -> new Drone(originLocation);
-            case EXPLORATION_ROVER -> new ExplorationRover(originLocation);
-            case REPAIR_ROBOT -> new RepairRobot(originLocation);
-            default -> null;
-        });
+    public Robot createAgent(Class<? extends Robot> type, Facility originLocation) {
+        Robot newAgent;
+        if (type == Drone.class) {
+            newAgent = new Drone(originLocation);
+        } else if (type == ExplorationRover.class) {
+            newAgent = new ExplorationRover(originLocation);
+        } else if (type == RepairRobot.class) {
+            newAgent = new RepairRobot(originLocation);
+        } else {
+            throw new IllegalArgumentException("Invalid agent: " + type);
+        }
+        return register(newAgent);
     }
 
     public ArrayList<Agent> getAgents() {
@@ -127,10 +135,10 @@ public class AgentManager {
         }
 
         ArrayList<Agent> agentsToProvide = new ArrayList<>();
-        Map<Class<? extends Agent>, Integer> requiredAgentTypes = mission.getRequiredAgents();
+        Map<Class<? extends Agent>, Integer> requiredAgentType = mission.getRequiredAgents();
 
-        for (Class<? extends Agent> agentType : requiredAgentTypes.keySet()) {
-            int neededCount = requiredAgentTypes.get(agentType);
+        for (Class<? extends Agent> agentType : requiredAgentType.keySet()) {
+            int neededCount = requiredAgentType.get(agentType);
 
             for (Agent agent : agents) {
                 if (neededCount == 0) {
