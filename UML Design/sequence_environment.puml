@@ -1,0 +1,114 @@
+@startuml MARS_OPS_Sequence_Environmental_Restriction
+skinparam monochrome false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 220
+
+title Sequence Diagram C: Environmental Restriction (Dust Storm Blocks Exploration Mission)
+
+actor "Colony Operator" as Operator
+participant "colony : Colony" as Colony
+participant "printManager : PrintManager" as PrintMgr
+participant "mission : ExplorationMission" as Mission
+participant "agentManager : AgentManager" as AgentMgr
+participant "facilityManager : FacilityManager" as FacMgr
+
+autonumber
+
+== 1. Environmental Condition Change (Dust Storm) ==
+
+Operator -> Colony : setEnvironment(Environment.DUST_STORM)
+activate Colony
+Colony -> Colony : environment = Environment.DUST_STORM
+Colony --> Operator : void
+deactivate Colony
+
+Operator -> PrintMgr : printEnvironment()
+activate PrintMgr
+PrintMgr -> Colony : getEnvironment()
+activate Colony
+Colony --> PrintMgr : Environment.DUST_STORM
+deactivate Colony
+PrintMgr --> Operator : Warning: Surface operations not allowed during dust storm
+deactivate PrintMgr
+
+== 2. Exploration Mission Creation & Submission ==
+
+Operator -> Mission : new ExplorationMission(duration, region, rovers, scientists, ...)
+activate Mission
+Mission -> Mission : status = null, targetLocation = SurfaceLocation(region)
+Mission --> Operator : mission
+deactivate Mission
+
+Operator -> Colony : submitMission(mission)
+activate Colony
+
+Colony -> Colony : check activeMission != null (false)
+Colony -> Colony : check environment == DUST_STORM &&\nmission instanceof ExplorationMission
+
+alt [environment == Environment.DUST_STORM && mission instanceof ExplorationMission] (Blocked by Dust Storm)
+
+    Colony -> Colony : rejectMission(mission,\n"Surface operations are not allowed during a dust storm.")
+
+    Colony -> Mission : fail("Surface operations are not allowed during a dust storm.")
+    activate Mission
+    Mission -> Mission : status = MissionStatus.FAILED\nfailureReason = "Surface operations are not allowed during a dust storm."
+    Mission --> Colony : void
+    deactivate Mission
+
+    Colony -> Colony : addCompletedMission(mission)\n(pastMissions.add(mission))
+    note right of Colony
+      AgentManager.provide() and FacilityManager.provide()
+      are never invoked. No agents locked, no resources deducted,
+      and activeMission remains null.
+    end note
+
+    Colony --> Operator : false
+
+else [environment == Environment.NORMAL] (Normal Conditions - Permitted to Proceed)
+
+    Colony -> Mission : validateRequirements()
+    activate Mission
+    Mission --> Colony : true
+    deactivate Mission
+
+    Colony -> AgentMgr : canProvide(mission) / provide(mission)
+    activate AgentMgr
+    AgentMgr --> Colony : assignedAgents
+    deactivate AgentMgr
+
+    Colony -> Mission : assignAgents(assignedAgents)
+    activate Mission
+    Mission -> Mission : status = MissionStatus.ASSIGNED
+    Mission --> Colony : void
+    deactivate Mission
+
+    Colony -> FacMgr : canProvide(mission) / provide(mission)
+    activate FacMgr
+    FacMgr --> Colony : resourcesProvided
+    deactivate FacMgr
+
+    Colony -> Colony : activeMission = mission
+    Colony --> Operator : true
+
+end
+deactivate Colony
+
+== 3. Inspect Rejected Mission Outcome ==
+
+Operator -> PrintMgr : printMissionOutcome(mission)
+activate PrintMgr
+PrintMgr -> Mission : getStatus()
+activate Mission
+Mission --> PrintMgr : MissionStatus.FAILED
+deactivate Mission
+
+PrintMgr -> Mission : getFailureReason()
+activate Mission
+Mission --> PrintMgr : "Surface operations are not allowed during a dust storm."
+deactivate Mission
+
+PrintMgr --> Operator : Prints FAILED status & dust storm failure reason
+deactivate PrintMgr
+
+@enduml

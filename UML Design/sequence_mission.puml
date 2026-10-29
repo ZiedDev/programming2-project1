@@ -1,0 +1,215 @@
+@startuml MARS_OPS_Sequence_Mission_Submission_And_Execution
+skinparam monochrome false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 220
+
+title Sequence Diagram A: Mission Submission and Execution
+
+actor "Colony Operator" as Operator
+participant "colony : Colony" as Colony
+participant "mission : Mission" as Mission
+participant "agentManager : AgentManager" as AgentMgr
+participant "agent : Agent" as Agent
+participant "facilityManager : FacilityManager" as FacMgr
+participant "facility : Facility" as Facility
+
+autonumber
+
+== Phase 1: Mission Submission & Validation ==
+
+Operator -> Colony : submitMission(mission)
+activate Colony
+
+Colony -> Colony : check activeMission != null
+Colony -> Colony : check Environment restrictions\n(DUST_STORM / COMM_DISRUPTION)
+
+Colony -> Mission : validateRequirements()
+activate Mission
+Mission --> Colony : isValidReq
+deactivate Mission
+
+Colony -> AgentMgr : canProvide(mission)
+activate AgentMgr
+AgentMgr -> Mission : getRequiredAgents()
+activate Mission
+Mission --> AgentMgr : requiredAgentsMap
+deactivate Mission
+
+loop for each required Agent type and candidate Agent
+    AgentMgr -> Agent : canPerform(mission)
+    activate Agent
+    note right of Agent
+      Checks isAvailable, allowed mission types,
+      and fatigue (Human) or batteryLevel (Robot)
+    end note
+    Agent --> AgentMgr : capable
+    deactivate Agent
+end
+AgentMgr --> Colony : canProvideAgents
+deactivate AgentMgr
+
+Colony -> FacMgr : canProvide(mission)
+activate FacMgr
+FacMgr -> Mission : getRequiredResources()
+activate Mission
+Mission --> FacMgr : requiredResourcesMap
+deactivate Mission
+FacMgr -> Mission : getEquipmentCount()
+activate Mission
+Mission --> FacMgr : requiredEquipment
+deactivate Mission
+
+FacMgr -> FacMgr : getTotalResources() & getTotalEquipment()
+loop for each operational Facility [isAvailable() == true]
+    FacMgr -> Facility : getResources() / getEquipmentCount()
+    activate Facility
+    Facility --> FacMgr : availableAmounts
+    deactivate Facility
+end
+FacMgr --> Colony : canProvideResources
+deactivate FacMgr
+
+alt [activeMission != null || envRestricted || !isValidReq || !canProvideAgents || !canProvideResources] (Mission Rejected)
+
+    Colony -> Colony : rejectMission(mission, failureReason)
+    Colony -> Mission : fail(failureReason)
+    activate Mission
+    Mission -> Mission : status = MissionStatus.FAILED\nfailureReason = reason
+    Mission --> Colony : void
+    deactivate Mission
+
+    Colony -> Colony : addCompletedMission(mission)\n(pastMissions.add(mission))
+    note right of Colony
+      Mission never becomes active (activeMission unchanged).
+      No resources consumed; no agents assigned.
+    end note
+    Colony --> Operator : false
+
+else [All checks pass] (Mission Accepted)
+
+    Colony -> AgentMgr : provide(mission)
+    activate AgentMgr
+    loop for each selected capable Agent
+        AgentMgr -> Agent : setAvailable(false)
+        activate Agent
+        Agent --> AgentMgr : void
+        deactivate Agent
+
+        AgentMgr -> Agent : setAssignedMission(mission)
+        activate Agent
+        Agent --> AgentMgr : void
+        deactivate Agent
+
+        opt [mission.getTargetLocation() != null]
+            AgentMgr -> Agent : setCurrentLocation(targetLocation)
+            activate Agent
+            Agent --> AgentMgr : void
+            deactivate Agent
+        end
+    end
+    AgentMgr --> Colony : assignedAgents
+    deactivate AgentMgr
+
+    Colony -> Mission : assignAgents(assignedAgents)
+    activate Mission
+    Mission -> Mission : status = MissionStatus.ASSIGNED
+    Mission --> Colony : void
+    deactivate Mission
+
+    Colony -> FacMgr : provide(mission)
+    activate FacMgr
+    loop for each required resource & equipment (ordered by ResourceAllocationPolicy)
+        FacMgr -> Facility : deductResource(amount, type) / deductEquipment(count)
+        activate Facility
+        Facility --> FacMgr : remainingNeeded
+        deactivate Facility
+    end
+    FacMgr --> Colony : void
+    deactivate FacMgr
+
+    Colony -> Colony : activeMission = mission
+    Colony --> Operator : true
+
+end
+deactivate Colony
+
+== Phase 2: Simulation Time Advancement & Mission Execution ==
+
+loop each time step while activeMission != null
+    Operator -> Colony : advanceTime(timeUnit)
+    activate Colony
+
+    Colony -> AgentMgr : advanceTime(timeUnit)
+    activate AgentMgr
+    loop for each registered Agent
+        AgentMgr -> Agent : advanceTime(timeUnit)
+        activate Agent
+        note right of Agent
+          Updates Human fatigue or Robot batteryLevel
+        end note
+        Agent --> AgentMgr : void
+        deactivate Agent
+    end
+    AgentMgr --> Colony : void
+    deactivate AgentMgr
+
+    alt [Environmental Hazard Affects Active Mission (DUST_STORM or COMM_DISRUPTION)]
+        Colony -> Mission : fail(envFailureReason)
+        activate Mission
+        Mission -> Mission : status = MissionStatus.FAILED
+        Mission --> Colony : void
+        deactivate Mission
+    else [Environment Permits Continued Execution]
+        Colony -> Mission : tick(timeUnit)
+        activate Mission
+        opt [status == MissionStatus.ASSIGNED]
+            Mission -> Mission : status = MissionStatus.IN_PROGRESS
+        end
+        Mission -> Mission : elapsed += timeUnit
+        opt [elapsed >= duration]
+            Mission -> Mission : complete()\n(status = MissionStatus.COMPLETED)
+        end
+        Mission --> Colony : void
+        deactivate Mission
+    end
+
+    Colony -> Mission : getStatus()
+    activate Mission
+    Mission --> Colony : currentStatus
+    deactivate Mission
+
+    opt [currentStatus == COMPLETED || currentStatus == FAILED]
+        Colony -> Colony : addCompletedMission(activeMission)\n(pastMissions.add(activeMission))
+
+        Colony -> AgentMgr : release(activeMission)
+        activate AgentMgr
+        AgentMgr -> Mission : getAssignedAgents()
+        activate Mission
+        Mission --> AgentMgr : assignedAgents
+        deactivate Mission
+
+        loop for each assigned Agent
+            AgentMgr -> Agent : setAvailable(true)
+            activate Agent
+            Agent --> AgentMgr : void
+            deactivate Agent
+
+            opt [agent.getHealth() > 0]
+                AgentMgr -> Agent : setCurrentLocation(originLocation)
+                activate Agent
+                Agent --> AgentMgr : void
+                deactivate Agent
+            end
+        end
+        AgentMgr --> Colony : void
+        deactivate AgentMgr
+
+        Colony -> Colony : activeMission = null
+    end
+
+    Colony --> Operator : void
+    deactivate Colony
+end
+
+@enduml

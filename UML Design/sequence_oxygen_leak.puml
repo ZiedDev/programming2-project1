@@ -1,0 +1,185 @@
+@startuml MARS_OPS_Sequence_Oxygen_Leak_Emergency
+skinparam monochrome false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 220
+
+title Sequence Diagram B: Oxygen Leak Emergency Handling
+
+actor "Emergency Operator" as Operator
+participant "leak : OxygenLeakEmergency" as Leak
+participant "hab : Habitat" as Habitat
+participant "colony : Colony" as Colony
+participant "agentManager : AgentManager" as AgentMgr
+participant "responder : Agent" as Responder
+participant "facilityManager : FacilityManager" as FacMgr
+participant "supplyFacility : Facility" as SupplyFac
+
+autonumber
+
+== 1. Trigger Emergency, Identify Habitat & Deduct Initial Oxygen Loss ==
+
+Operator -> Leak : new OxygenLeakEmergency(hab, oxygenLoss, reqEng, reqBot, reqParts)
+activate Leak
+Leak -> Leak : affectedHabitat = hab\nregister requiredAgents (Engineer, RepairRobot)\nregister requiredResources (SPARE_PARTS)
+Leak -> Leak : applyOxygenLoss()
+Leak -> Habitat : deductResource(oxygenLoss, ResourceType.OXYGEN)
+activate Habitat
+note right of Habitat
+  Initial oxygen loss deducted immediately
+  from affected Habitat (clamped at 0).
+end note
+Habitat --> Leak : undeductedAmount
+deactivate Habitat
+Leak --> Operator : leak
+deactivate Leak
+
+== 2. Submit Emergency to Colony & Evaluate Responders / Resources ==
+
+Operator -> Colony : submitEmergency(leak)
+activate Colony
+
+Colony -> AgentMgr : canProvide(leak)
+activate AgentMgr
+AgentMgr -> Leak : getRequiredAgents()
+activate Leak
+Leak --> AgentMgr : requiredAgentsMap
+deactivate Leak
+
+loop for each required responder type (Engineer, RepairRobot) & candidate Agent
+    AgentMgr -> Responder : canHandle(leak)
+    activate Responder
+    note right of Responder
+      Checks isAvailable (not on active mission),
+      can handle OxygenLeakEmergency,
+      and fatigue < 100 / batteryLevel > 0
+    end note
+    Responder --> AgentMgr : canRespond
+    deactivate Responder
+end
+AgentMgr --> Colony : respondersAvailable
+deactivate AgentMgr
+
+alt [!respondersAvailable] (Alternative Flow 1: Required Responders Unavailable)
+
+    Colony -> Colony : rejectEmergency(leak, "Agents unavailable.")
+    Colony -> Leak : fail("Agents unavailable.")
+    activate Leak
+    Leak -> Leak : status = EmergencyStatus.UNRESOLVED\nfailureReason = "Agents unavailable."
+    Leak -> Leak : applyOxygenLoss()
+    Leak -> Habitat : deductResource(oxygenLoss, ResourceType.OXYGEN)
+    activate Habitat
+    note right of Habitat
+      Unresolved leak deducts oxygenLoss a second time
+      (2x total oxygen cost, clamped at 0).
+      No spare parts consumed.
+    end note
+    Habitat --> Leak : undeductedAmount
+    deactivate Habitat
+    Leak --> Colony : void
+    deactivate Leak
+
+    Colony -> Colony : pastEmergencies.add(leak)
+    Colony --> Operator : false
+
+else [respondersAvailable]
+
+    Colony -> FacMgr : canProvide(leak)
+    activate FacMgr
+    FacMgr -> Leak : getRequiredResources()
+    activate Leak
+    Leak --> FacMgr : requiredResourcesMap (SPARE_PARTS)
+    deactivate Leak
+
+    FacMgr -> FacMgr : getTotalResources()
+    loop for each operational Facility [isAvailable() == true]
+        FacMgr -> SupplyFac : getResources()
+        activate SupplyFac
+        SupplyFac --> FacMgr : facilityResources
+        deactivate SupplyFac
+    end
+    FacMgr --> Colony : resourcesAvailable
+    deactivate FacMgr
+
+    alt [!resourcesAvailable] (Alternative Flow 2: Insufficient Response Resources)
+
+        Colony -> Colony : rejectEmergency(leak, "Resources unavailable.")
+        Colony -> Leak : fail("Resources unavailable.")
+        activate Leak
+        Leak -> Leak : status = EmergencyStatus.UNRESOLVED\nfailureReason = "Resources unavailable."
+        Leak -> Leak : applyOxygenLoss()
+        Leak -> Habitat : deductResource(oxygenLoss, ResourceType.OXYGEN)
+        activate Habitat
+        note right of Habitat
+          All-or-nothing resource rule: no SPARE_PARTS consumed.
+          Additional oxygenLoss deducted from affected Habitat.
+        end note
+        Habitat --> Leak : undeductedAmount
+        deactivate Habitat
+        Leak --> Colony : void
+        deactivate Leak
+
+        Colony -> Colony : pastEmergencies.add(leak)
+        Colony --> Operator : false
+
+    else [resourcesAvailable]
+
+        Colony -> Leak : validateRequirements()
+        activate Leak
+        Leak -> Habitat : isAvailable()
+        activate Habitat
+        Habitat --> Leak : isHabitatOperational
+        deactivate Habitat
+        Leak --> Colony : isValidHabitat
+        deactivate Leak
+
+        alt [!isValidHabitat] (Affected Habitat Non-Operational)
+
+            Colony -> Colony : rejectEmergency(leak, leak.getFailureReason())
+            Colony -> Leak : fail(failureReason)
+            activate Leak
+            Leak -> Leak : status = EmergencyStatus.UNRESOLVED
+            Leak -> Habitat : deductResource(oxygenLoss, ResourceType.OXYGEN)
+            activate Habitat
+            Habitat --> Leak : undeductedAmount
+            deactivate Habitat
+            Leak --> Colony : void
+            deactivate Leak
+
+            Colony -> Colony : pastEmergencies.add(leak)
+            Colony --> Operator : false
+
+        else [isValidHabitat] (Main Success Flow: Dispatch, Repair & Resolve)
+
+            Colony -> FacMgr : provide(leak)
+            activate FacMgr
+            loop per ResourceAllocationPolicy.getPriority(SPARE_PARTS)
+                FacMgr -> SupplyFac : deductResource(reqSpareParts, ResourceType.SPARE_PARTS)
+                activate SupplyFac
+                SupplyFac --> FacMgr : remainingAmount
+                deactivate SupplyFac
+            end
+            FacMgr --> Colony : void
+            deactivate FacMgr
+
+            Colony -> Leak : resolve()
+            activate Leak
+            Leak -> Leak : status = EmergencyStatus.RESOLVED
+            note right of Leak
+              Leak repaired: no second oxygen loss applied.
+              Habitat remains operational.
+              Responders remain available (released immediately).
+            end note
+            Leak --> Colony : void
+            deactivate Leak
+
+            Colony -> Colony : pastEmergencies.add(leak)
+            Colony --> Operator : true
+
+        end
+    end
+end
+
+deactivate Colony
+
+@enduml

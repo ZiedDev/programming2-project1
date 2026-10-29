@@ -1,0 +1,90 @@
+@startuml MARS_OPS_State_Machine_Diagram
+skinparam monochrome false
+skinparam stateFontStyle bold
+skinparam shadowing false
+
+title MARS-OPS Mission Lifecycle - State Machine Diagram
+
+[*] --> Created : new Mission(duration)\n[status = null, elapsed = 0]
+
+state "Created (Unsubmitted)" as Created {
+    Created : status = null
+    Created : elapsed = 0
+    Created : failureReason = ""
+}
+
+state submissionCheck <<choice>>
+
+Created --> submissionCheck : colony.submitMission(mission)
+
+submissionCheck --> ASSIGNED : [activeMission == null &&\n envAllowed &&\n mission.validateRequirements() &&\n agentManager.canProvide(mission) &&\n facilityManager.canProvide(mission)]\n/ agentManager.provide(mission);\n  mission.assignAgents(agents);\n  facilityManager.provide(mission);\n  colony.activeMission = mission
+
+submissionCheck --> FAILED : [rejection condition met]\n/ rejectMission(mission, reason);\n  pastMissions.add(mission)
+
+note on link
+  **Submission Rejection Causes (Never Becomes Active):**
+  1. Another mission is already active (activeMission != null)
+  2. Dust storm blocks surface ExplorationMission
+  3. Comm disruption blocks communication-dependent Mission
+  4. Invalid mission parameters (!mission.validateRequirements())
+  5. Suitable/available agents lacking or insufficient battery/high fatigue (!agentManager.canProvide)
+  6. Insufficient colony-wide operational resources/equipment (!facilityManager.canProvide)
+  *(All-or-nothing: no resources consumed, no agents locked)*
+end note
+
+state ASSIGNED {
+    ASSIGNED : status = MissionStatus.ASSIGNED
+    ASSIGNED : elapsed = 0
+    ASSIGNED : activeMission = this
+    ASSIGNED : assignedAgents marked unavailable & relocated
+    ASSIGNED : required resources & equipment deducted
+}
+
+state IN_PROGRESS {
+    IN_PROGRESS : status = MissionStatus.IN_PROGRESS
+    IN_PROGRESS : 0 < elapsed < duration
+    IN_PROGRESS : do / agents update fatigue / battery per timeUnit
+}
+
+ASSIGNED --> IN_PROGRESS : colony.advanceTime(timeUnit)\n[envAllowed]\n/ mission.tick(timeUnit)\n  (status = IN_PROGRESS; elapsed += timeUnit)
+
+ASSIGNED --> FAILED : colony.advanceTime(timeUnit) [envHazard]\nOR mission.fail(reason)\n/ fail(reason); pastMissions.add(this);\n  agentManager.release(this); activeMission = null
+
+IN_PROGRESS --> IN_PROGRESS : colony.advanceTime(timeUnit)\n[envAllowed && elapsed + timeUnit < duration]\n/ mission.tick(timeUnit) (elapsed += timeUnit)
+
+IN_PROGRESS --> COMPLETED : [elapsed >= duration]\n/ elapsed = duration; mission.complete();\n  pastMissions.add(this);\n  agentManager.release(this);\n  activeMission = null
+
+IN_PROGRESS --> FAILED : colony.advanceTime(timeUnit) [envHazard]\nOR mission.fail(reason)\n/ fail(reason); pastMissions.add(this);\n  agentManager.release(this); activeMission = null
+
+note right of IN_PROGRESS
+  **Runtime Failure Causes:**
+  - Dust storm hits active ExplorationMission
+  - Comm disruption hits comm-dependent Mission
+  - Equipment failure / Rover breakdown / Battery depletion
+end note
+
+state COMPLETED {
+    COMPLETED : status = MissionStatus.COMPLETED
+    COMPLETED : elapsed == duration
+    COMPLETED : entry / restore repaired target (if RepairMission)
+    COMPLETED : entry / rescue stranded agent (if RescueMission)
+    COMPLETED : entry / assigned agents released & returned to originLocation
+}
+
+state FAILED {
+    FAILED : status = MissionStatus.FAILED
+    FAILED : failureReason != ""
+    FAILED : entry / record failureReason in pastMissions
+    FAILED : entry / release assigned agents (if any)
+}
+
+note bottom of FAILED
+  **Terminal State:**
+  Failed missions cannot be retried (tick() is ignored).
+  A new Mission instance must be created for another attempt.
+end note
+
+COMPLETED --> [*]
+FAILED --> [*]
+
+@enduml
