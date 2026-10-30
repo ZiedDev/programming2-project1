@@ -1,0 +1,205 @@
+@startuml MarsOps_Mission_Class_Diagram
+
+skinparam monochrome false
+skinparam classFontStyle bold
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+title MarsOps - Mission Subsystem Class Diagram
+
+package "marsops.colony" {
+    enum Environment {
+        NORMAL
+        DUST_STORM
+        COMM_DISRUPTION
+    }
+
+    class Colony {
+        - activeMission: Mission
+        - environment: Environment
+        - pastMissions: List<Mission> {readOnly}
+        - agentManager: AgentManager {readOnly}
+        - facilityManager: FacilityManager {readOnly}
+        - printManager: PrintManager {readOnly}
+        + submitMission(mission: Mission): boolean
+        - rejectMission(mission: Mission, reason: String): void
+        - addCompletedMission(mission: Mission): void
+        + advanceTime(timeUnit: int): void
+        + getActiveMission(): Mission
+        + getPastMissions(): List<Mission>
+    }
+
+    class AgentManager {
+        + canProvide(mission: Mission): boolean
+        + provide(mission: Mission): ArrayList<Agent>
+        + release(mission: Mission): void
+        + rescue(mission: Mission): void
+    }
+
+    class FacilityManager {
+        + canProvide(mission: Mission): boolean
+        + provide(mission: Mission): void
+    }
+
+    class PrintManager {
+        + printMissionOutcome(mission: Mission): void
+        + printMissionAndEmergencyOutcomes(): void
+    }
+}
+
+package "marsops.mission" {
+
+    enum MissionStatus {
+        ASSIGNED
+        IN_PROGRESS
+        COMPLETED
+        FAILED
+        - value: String {readOnly}
+        ~ MissionStatus(value: String)
+        + toString(): String
+    }
+
+    abstract class Mission {
+        - duration: int {readOnly}
+        - elapsed: int
+        # requiredEquipment: int
+        - isCommunicationDependent: boolean
+        - status: MissionStatus
+        # failureReason: String
+        - requiredResources: Map<ResourceType, Integer> {readOnly}
+        # requiredAgents: Map<Class<? extends Agent>, Integer> {readOnly}
+        - assignedAgents: ArrayList<Agent>
+        # targetLocation: Location
+        # targetAgent: Agent
+        + Mission(duration: int)
+        + {abstract} validateRequirements(): boolean
+        + assignAgents(agents: ArrayList<Agent>): void
+        + tick(timeUnits: int): void
+        + complete(): void
+        + fail(reason: String): void
+        + getDuration(): int
+        + getElapsed(): int
+        + getEquipmentCount(): int
+        + isCommunicationDependent(): boolean
+        + setCommunicationDependent(isCommunicationDependent: boolean): void
+        + getStatus(): MissionStatus
+        + setStatus(status: MissionStatus): void
+        + getFailureReason(): String
+        + getTargetLocation(): Location
+        + getTargetAgent(): Agent
+        + getRequiredResources(): Map<ResourceType, Integer>
+        + getRequiredAgents(): Map<Class<? extends Agent>, Integer>
+        + getAssignedAgents(): ArrayList<Agent>
+        + addRequiredResource(type: ResourceType, amount: int): void
+        + addRequiredAgent(type: Class<? extends Agent>, amount: int): void
+        + addRequiredEquipment(amount: int): void
+    }
+
+    together {
+        class ExplorationMission extends Mission {
+            - region: String {readOnly}
+            + ExplorationMission(duration: int, region: String, requiredRoverCount: int, requiredScientistCount: int, requiredBatteryCount: int, requiredEquipmentCount: int, requiredFuel: int, requiredOxygen: int, requiredWater: int, requiredFood: int)
+            + validateRequirements(): boolean
+            + getRegion(): String
+        }
+
+        class RepairMission extends Mission {
+            - damagedFacility: Facility {readOnly}
+            - damagedEquipment: Equipment {readOnly}
+            + RepairMission(duration: int, damagedFacility: Facility, requiredEngineerCount: int, requiredRepairBotCount: int, requiredBatteryCount: int, requiredSparePartsCount: int)
+            + RepairMission(duration: int, damagedEquipment: Equipment, requiredEngineerCount: int, requiredRepairBotCount: int, requiredBatteryCount: int, requiredSparePartsCount: int)
+            + validateRequirements(): boolean
+            + complete(): void
+            + getDamagedFacility(): Facility
+            + getDamagedEquipment(): Equipment
+        }
+
+        class ResearchMission extends Mission {
+            - laboratory: Laboratory {readOnly}
+            + ResearchMission(duration: int, laboratory: Laboratory, requiredScientistCount: int, requiredBatteryCount: int, requiredSparePartsCount: int, requiredEquipmentCount: int)
+            + validateRequirements(): boolean
+            + getLaboratory(): Laboratory
+        }
+
+        class RescueMission extends Mission {
+            - strandedAgent: Agent {readOnly}
+            + RescueMission(duration: int, strandedAgent: Agent, requiredRoverCount: int, requiredMedicalOfficerCount: int, requiredMedicalSuppliesCount: int, requiredFuelCount: int)
+            + RescueMission(duration: int, targetRegion: String, requiredRoverCount: int, requiredMedicalOfficerCount: int, requiredMedicalSuppliesCount: int, requiredFuelCount: int)
+            + validateRequirements(): boolean
+            + getStrandedAgent(): Agent
+        }
+    }
+}
+
+package "marsops.facility" {
+    abstract class Location {
+        # location: String
+        + Location(location: String)
+    }
+
+    class SurfaceLocation extends Location {
+        + SurfaceLocation(location: String)
+    }
+
+    abstract class Facility extends Location {
+        + setAvailability(state: boolean): void
+        + isAvailable(): boolean
+    }
+
+    class Laboratory extends Facility {
+        + Laboratory(location: String, capacity: int)
+    }
+}
+
+package "marsops.agent" {
+    abstract class Agent {
+        - assignedMission: Mission
+        + canPerform(mission: Mission): boolean
+        + setAssignedMission(assignedMission: Mission): void
+        + getAssignedMission(): Mission
+    }
+}
+
+package "marsops.resource" {
+    enum ResourceType {
+        OXYGEN
+        WATER
+        FOOD
+        FUEL
+        BATTERY
+        MEDICAL
+        SPARE_PARTS
+    }
+
+    class Equipment {
+        + getLocation(): Location
+        + fix(): void
+    }
+}
+
+' --- RELATIONSHIPS ---
+Colony --> "0..1" Mission : activeMission >
+Colony o-- "0..*" Mission : pastMissions >
+Colony --> "1" Environment : environment >
+Colony *-- "1" AgentManager : coordinates >
+Colony *-- "1" FacilityManager : coordinates >
+Colony *-- "1" PrintManager : owns >
+
+AgentManager ..> Mission : checks, provides & releases >
+FacilityManager ..> Mission : checks & provides >
+PrintManager ..> Mission : reports outcome >
+
+Mission --> "0..1" MissionStatus : status >
+Mission --> "0..1" Location : targetLocation >
+Mission --> "0..1" Agent : targetAgent >
+Mission o-- "0..*" Agent : assignedAgents >
+Mission ..> ResourceType : requires >
+
+ExplorationMission *-- "0..1" SurfaceLocation : creates >
+RepairMission --> "0..1" Facility : damagedFacility >
+RepairMission --> "0..1" Equipment : damagedEquipment >
+ResearchMission --> "1" Laboratory : laboratory >
+RescueMission --> "0..1" Agent : strandedAgent >
+RescueMission *-- "0..1" SurfaceLocation : creates (region mode) >
+
+@enduml
