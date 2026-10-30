@@ -8,6 +8,16 @@ skinparam packageStyle rectangle
 top to bottom direction
 
 package "marsops.colony" {
+
+    class Colony {
+        - pastEmergencies: List<Emergency>
+        - agentManager: AgentManager
+        - facilityManager: FacilityManager
+        + submitEmergency(emergency: Emergency): boolean
+        - rejectEmergency(emergency: Emergency, reason: String): void
+        + getPastEmergencies(): List<Emergency>
+    }
+
     class FacilityManager {
         - facilityList: List<Facility>
         + addFacility(x: Facility): void
@@ -23,21 +33,21 @@ package "marsops.colony" {
     }
     
     class AgentManager {
-        - {static} agents: ArrayList<Agent> {readOnly}
-        - {static} agentsCount: Map<Class<? extends Agent>, Integer> {readOnly}
-        - register<T : Agent>(agent: T): T
-        + createAgent(type: Class<? extends Human>, originLocation: Facility, name: String, id: String): Human
-        + createAgent(type: Class<? extends Robot>, originLocation: Facility): Robot
-        + addAgent(agent: Agent): void
-        + getAgents(): ArrayList<Agent>
-        + canProvide(mission: Mission): boolean
-        + canProvide(emergency: Emergency): boolean
-        + provide(mission: Mission): ArrayList<Agent>
-        + release(mission: Mission): void
-        + rescue(mission: Mission): void
-        + relocate(agent: Agent, location: Location): void
-        + relocate(agents: ArrayList<Agent>, location: Location): void
-        + advanceTime(timeUnit: int): void
+- {static} agents: ArrayList<Agent> {readOnly}
+- {static} agentsCount: Map<Class<? extends Agent>, Integer> {readOnly}
+- register<T : Agent>(agent: T): T
++ createAgent(type: Class<? extends Human>, originLocation: Facility, name: String, id: String): Human
++ createAgent(type: Class<? extends Robot>, originLocation: Facility): Robot
++ addAgent(agent: Agent): void
++ getAgents(): ArrayList<Agent>
++ canProvide(mission: Mission): boolean
++ canProvide(emergency: Emergency): boolean
++ provide(mission: Mission): ArrayList<Agent>
++ release(mission: Mission): void
++ rescue(mission: Mission): void
++ relocate(agent: Agent, location: Location): void
++ relocate(agents: ArrayList<Agent>, location: Location): void
++ advanceTime(timeUnit: int): void
     }
 
     FacilityManager -[hidden]right- AgentManager
@@ -45,10 +55,6 @@ package "marsops.colony" {
 
 package "marsops.mission" {
     class Mission
-}
-
-package "marsops.emergency" {
-    class Emergency
 }
 
 package "marsops.facility" {
@@ -200,6 +206,63 @@ package "marsops.agent" {
     }
 }
 
+package "marsops.emergency" {
+
+    enum EmergencyStatus {
+        RESOLVED
+        UNRESOLVED
+    }
+
+    abstract class Emergency {
+        # status: EmergencyStatus
+        # failureReason: String
+        # location: Location
+        # requiredAgents: Map<Class<? extends Agent>, Integer>
+        # requiredResources: Map<ResourceType, Integer>
+        + Emergency(location: Location)
+        + {abstract} validateRequirements(): boolean
+        + getFailureReason(): String
+        + resolve(): void
+        + fail(reason: String): void
+        + getRequiredAgents(): Map<Class<? extends Agent>, Integer>
+        + getRequiredResources(): Map<ResourceType, Integer>
+        + addRequiredResource(type: ResourceType, amount: int): void
+    }
+
+    together {
+        class OxygenLeakEmergency extends Emergency {
+            - affectedHabitat: Habitat
+            - oxygenLoss: int
+            + OxygenLeakEmergency(affectedHabitat: Habitat, oxygenLoss: int, requiredEngineerCount: int, requiredRepairBotCount: int, requiredSparePartsCount: int)
+            - applyOxygenLoss(): void
+            + validateRequirements(): boolean
+            + fail(reason: String): void
+        }
+
+        class FireEmergency extends Emergency {
+            - affectedLaboratory: Laboratory
+            + FireEmergency(affectedLaboratory: Laboratory, requiredWaterCount: int, requiredMedicalSuppliesCount: int)
+            + validateRequirements(): boolean
+            + fail(reason: String): void
+        }
+
+        class RoverBreakdownEmergency extends Emergency {
+            - damagedRover: ExplorationRover
+            + RoverBreakdownEmergency(damagedRover: ExplorationRover, requiredSparePartsCount: int)
+            + validateRequirements(): boolean
+            + resolve(): void
+        }
+
+        class MedicalEmergency extends Emergency {
+            - patient: Human
+            - treatmentFacility: Facility
+            + MedicalEmergency(patient: Human, treatmentFacility: Facility, requiredMedicalSuppliesCount: int)
+            + validateRequirements(): boolean
+            + resolve(): void
+        }
+    }
+}
+
 
 ' --- RELATIONSHIPS ---
 FacilityManager o--- "0..*" Facility : manages via facilityList
@@ -214,4 +277,17 @@ AgentManager o--- "*" Agent
 AgentManager ..> Mission : provides for >
 AgentManager ..> Emergency : provides for >
 
+Colony *..> AgentManager : coordinates >
+Colony *..> FacilityManager : coordinates >
+Colony o-- "0..*" Emergency : pastEmergencies >
+
+Emergency --> EmergencyStatus : has >
+Emergency ..> ResourceType : requires >
+Emergency ..> Agent : requires >
+
+OxygenLeakEmergency -->  Habitat : affects >
+FireEmergency -->  Laboratory : affects >
+RoverBreakdownEmergency -->  ExplorationRover : affects >
+MedicalEmergency -->  Human : affects >
+MedicalEmergency -->  Facility : resolved at >
 @enduml

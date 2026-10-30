@@ -142,15 +142,14 @@ Colony ..> FacilityManager : coordinates >
 AgentManager ..> Emergency : checks / canProvide >
 FacilityManager ..> Emergency : checks & provides >
 
-Emergency --> "1" EmergencyStatus : status >
-Emergency --> "1" Location : location >
+Emergency --> EmergencyStatus : has >
 Emergency ..> ResourceType : requires >
 Emergency ..> Agent : requires >
 
-OxygenLeakEmergency --> "1" Habitat : affectedHabitat >
-FireEmergency --> "1" Laboratory : affectedLaboratory >
-RoverBreakdownEmergency --> "1" ExplorationRover : damagedRover >
-MedicalEmergency --> "1" Human : patient >
-MedicalEmergency --> "1" Facility : treatmentFacility >
+OxygenLeakEmergency -->  Habitat : affects >
+FireEmergency -->  Laboratory : affects >
+RoverBreakdownEmergency -->  ExplorationRover : affects >
+MedicalEmergency -->  Human : affects >
+MedicalEmergency -->  Facility : resolved at >
 
 @enduml
