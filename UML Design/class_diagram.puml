@@ -1,271 +1,217 @@
-@startuml MARS_OPS_Class_Diagram
-skinparam classAttributeIconSize 0
+@startuml MarsOps_Facility_Class_Diagram
+
 skinparam monochrome false
 skinparam classFontStyle bold
 skinparam linetype ortho
+skinparam packageStyle rectangle
 
-title MARS-OPS Class Diagram (Static Structure)
+top to bottom direction
 
-' --- ENUMERATIONS ---
-enum Environment {
-    NORMAL
-    DUST_STORM
-    COMM_DISRUPTION
+package "marsops.colony" {
+    class FacilityManager {
+        - facilityList: List<Facility>
+        + addFacility(x: Facility): void
+        + getFacilities(): List<Facility>
+        + getTotalResources(): Map<ResourceType, Integer>
+        + getTotalEquipment(): int
+        + canProvide(mission: Mission): boolean
+        + canProvide(emergency: Emergency): boolean
+        - canProvide(requiredResources: Map<ResourceType, Integer>, requiredEquipment: int): boolean
+        + provide(emergency: Emergency): void
+        + provide(mission: Mission): void
+        - provide(requiredResources: Map<ResourceType, Integer>, requiredEquipment: int): void
+    }
+    
+    class AgentManager {
+        - {static} agents: ArrayList<Agent> {readOnly}
+        - {static} agentsCount: Map<Class<? extends Agent>, Integer> {readOnly}
+        - register<T : Agent>(agent: T): T
+        + createAgent(type: Class<? extends Human>, originLocation: Facility, name: String, id: String): Human
+        + createAgent(type: Class<? extends Robot>, originLocation: Facility): Robot
+        + addAgent(agent: Agent): void
+        + getAgents(): ArrayList<Agent>
+        + canProvide(mission: Mission): boolean
+        + canProvide(emergency: Emergency): boolean
+        + provide(mission: Mission): ArrayList<Agent>
+        + release(mission: Mission): void
+        + rescue(mission: Mission): void
+        + relocate(agent: Agent, location: Location): void
+        + relocate(agents: ArrayList<Agent>, location: Location): void
+        + advanceTime(timeUnit: int): void
+    }
+
+    FacilityManager -[hidden]right- AgentManager
 }
 
-enum MissionStatus {
-    ASSIGNED
-    IN_PROGRESS
-    COMPLETED
-    FAILED
+package "marsops.mission" {
+    class Mission
 }
 
-enum EmergencyStatus {
-    RESOLVED
-    UNRESOLVED
+package "marsops.emergency" {
+    class Emergency
 }
 
-enum ResourceType {
-    OXYGEN
-    WATER
-    FOOD
-    FUEL
-    BATTERY
-    MEDICAL
-    SPARE_PARTS
+package "marsops.facility" {
+    abstract class Location {
+        # location: String
+        + Location(location: String)
+    }
+
+    class SurfaceLocation extends Location {
+        + SurfaceLocation(location: String)
+    }
+
+    abstract class Facility extends Location {
+        - capacity: int
+        - resourceAmount: Map<ResourceType, Integer>
+        - equipmentList: List<Equipment>
+        - id: int
+        - {static} cnt: int = 0
+        - isAvailable: boolean
+        - totalTakenCapacity: int = 0
+        # prioToAllocate: ResourceType[7]
+        + Facility(location: String, capacity: int)
+        + setAvailability(state: boolean): void
+        + isAvailable(): boolean
+        + getResources(): Map<ResourceType, Integer>
+        + getEquipment(): List<Equipment>
+        + getEquipmentCount(): int
+        + getTotalTakenCapacity(): int
+        + addEquipment(): boolean
+        + deductEquipment(amount: int): int
+        + addResources(resourcesToAllocate: Map<ResourceType, Integer>): Map<ResourceType, Integer>
+        + deductResource(amount: int, resource: ResourceType): int
+    }
+
+    together {
+        class Habitat extends Facility {
+            + Habitat(location: String, capacity: int)
+        }
+        class Laboratory extends Facility {
+            + Laboratory(location: String, capacity: int)
+        }
+        class PowerStation extends Facility {
+            + PowerStation(location: String, capacity: int)
+        }
+        class StorageFacility extends Facility {
+            + StorageFacility(location: String, capacity: int)
+        }
+        class CommunicationStation extends Facility {
+            + CommunicationStation(location: String, capacity: int)
+        }
+    }
 }
 
-enum EmergencyType {
-    OXYGEN_LEAK
-    FIRE
-    ROVER_BREAKDOWN
-    MEDICAL_EMERGENCY
+package "marsops.resource" {
+    class Equipment {
+        - isDamaged: Boolean
+        - {static} cnt: int = 0
+        - id: int
+        - location: Location
+        + Equipment(location: Location)
+        + isAvailable(): boolean
+        + fix(): void
+        + damage(): void
+    }
+
+    enum ResourceType {
+        OXYGEN
+        WATER
+        FOOD
+        FUEL
+        BATTERY
+        MEDICAL
+        SPARE_PARTS
+    }
+
+    class ResourceAllocationPolicy {
+        - {static} PRIORITY: Map<ResourceType, List<Class<? extends Facility>>>
+        - {static} DEFAULT_PRIORITY: List<Class<? extends Facility>>
+        - ResourceAllocationPolicy()
+        + {static} getPriority(resourceType: ResourceType): List<Class<? extends Facility>>
+        + {static} getEquipmentPriority(): List<Class<? extends Facility>>
+    }
 }
 
-' --- EQUIPMENT ---
-class Equipment {
-    - isDamaged: boolean
-    + isDamaged(): boolean
-    + setDamaged(damaged: boolean): void
+package "marsops.agent" {
+    abstract class Agent {
+        - originLocation: Facility {readOnly}
+        - currentLocation: Location
+        - isAvailable: boolean
+        - health: int
+        - assignedMission: Mission
+        + setAvailable(available: boolean): void
+        + setAssignedMission(assignedMission: Mission): void
+        + getCurrentLocation(): Location
+        + isAvailable(): boolean
+        + getAssignedMission(): Mission
+        + canPerform(mission: Mission): boolean
+        + canHandle(emergency: Emergency): boolean
+    }
+
+    abstract class Human extends Agent {
+        - {static} FATIGUE_MAX: int = 100 {readOnly}
+        - {static} FATIGUE_MIN: int = 0 {readOnly}
+        - id: String {readOnly}
+        - name: String {readOnly}
+        - fatigue: int
+        + reduceFatigue(timeUnit: int): void
+        + increaseFatigue(timeUnit: int): void
+        + updateFatigue(timeUnit: int): void
+        + canPerform(mission: Mission): boolean
+        + canHandle(emergency: Emergency): boolean
+        + advanceTime(timeUnit: int): void
+    }
+
+    class Engineer extends Human {
+        + canPerform(mission: Mission): boolean
+    }
+
+    class MedicalOfficer extends Human {
+        + canPerform(mission: Mission): boolean
+    }
+
+    class Scientist extends Human {
+        + canPerform(mission: Mission): boolean
+    }
+
+    abstract class Robot extends Agent {
+        - {static} BATTERY_LEVEL_MAX: int = 100 {readOnly}
+        - {static} BATTERY_LEVEL_MIN: int = 0 {readOnly}
+        - batteryLevel: int
+        + reduceBatteryLevel(timeUnit: int): void
+        + increaseBatteryLevel(timeUnit: int): void
+        + updateBatteryLevel(timeUnit: int): void
+        + canPerform(mission: Mission): boolean
+        + canHandle(emergency: Emergency): boolean
+        + advanceTime(timeUnit: int): void
+    }
+
+    class Drone extends Robot {
+        + canPerform(mission: Mission): boolean
+    }
+
+    class ExplorationRover extends Robot {
+        + canPerform(mission: Mission): boolean
+    }
+
+    class RepairRobot extends Robot {
+        + canPerform(mission: Mission): boolean
+    }
 }
 
-' --- COLONY CORE & COMPOSITION ---
-class Colony {
-    - environment: Environment
-    - activeMission: Mission
-    - pastMissions: List<Mission>
-    - pastEmergencies: List<Emergency>
-    - printManager: PrintManager
-    + submitMission(mission: Mission, agents: List<Agent>): boolean
-    + handleEmergency(emergency: Emergency): boolean
-    + advanceTime(units: int): void
-    + getTotalResource(type: ResourceType): int
-    + consumeResources(req: Map<ResourceType, Integer>): boolean
-    + getFacilities(): List<Facility>
-    + getAgents(): List<Agent>
-}
-
-class PrintManager {
-    - colony: Colony
-    + printStatusReport(): void
-    + printResourceTotals(): void
-    + printEnvironmentStatus(): void
-    + printMissionHistory(): void
-    + printEmergencyHistory(): void
-}
-
-' --- FACILITIES ---
-abstract class Facility {
-    # location: String
-    # capacity: int
-    # isOperational: boolean
-    # resources: Map<ResourceType, Integer>
-    + isOperational(): boolean
-    + setOperational(operational: boolean): void
-    + getResource(type: ResourceType): int
-    + addResource(type: ResourceType, amount: int): void
-    + deductResource(type: ResourceType, amount: int): boolean
-    + getEquipmentList(): List<Equipment>
-}
-
-class Habitat extends Facility {
-}
-
-class Laboratory extends Facility {
-}
-
-class StorageFacility extends Facility {
-}
-
-class PowerStation extends Facility {
-}
-
-class CommunicationStation extends Facility {
-}
-
-' --- AGENTS ---
-abstract class Agent {
-    # name: String
-    # id: String
-    # currentLocation: String
-    # isAvailable: boolean
-    # health: int
-    + {abstract} canPerform(mission: Mission): boolean
-    + {abstract} canHandle(emergency: Emergency): boolean
-    + isAvailable(): boolean
-    + setAvailable(available: boolean): void
-    + getCurrentLocation(): String
-    + setCurrentLocation(location: String): void
-    + getHealth(): int
-    + setHealth(health: int): void
-}
-
-abstract class Human extends Agent {
-    # fatigue: int
-    # skills: List<String>
-    + getFatigue(): int
-    + setFatigue(fatigue: int): void
-    + getSkills(): List<String>
-}
-
-class Scientist extends Human {
-    + canPerform(mission: Mission): boolean
-    + canHandle(emergency: Emergency): boolean
-}
-
-class Engineer extends Human {
-    + canPerform(mission: Mission): boolean
-    + canHandle(emergency: Emergency): boolean
-    + repair(equipment: Equipment): void
-}
-
-class MedicalOfficer extends Human {
-    + canPerform(mission: Mission): boolean
-    + canHandle(emergency: Emergency): boolean
-    + treatPatient(patient: Human): void
-}
-
-abstract class RobotUnit extends Agent {
-    # batteryLevel: int
-    + getBatteryLevel(): int
-    + consumeBattery(amount: int): void
-    + recharge(amount: int): void
-}
-
-class ExplorationRover extends RobotUnit {
-    + canPerform(mission: Mission): boolean
-    + canHandle(emergency: Emergency): boolean
-}
-
-class RepairRobot extends RobotUnit {
-    + canPerform(mission: Mission): boolean
-    + canHandle(emergency: Emergency): boolean
-}
-
-class Drone extends RobotUnit {
-    + canPerform(mission: Mission): boolean
-    + canHandle(emergency: Emergency): boolean
-}
-
-' --- MISSIONS ---
-abstract class Mission {
-    # duration: int
-    # elapsed: int
-    # isCommunicationDependent: boolean
-    # status: MissionStatus
-    # failureReason: String
-    # requiredResources: Map<ResourceType, Integer>
-    # assignedAgents: List<Agent>
-    + {abstract} validateRequirements(agents: List<Agent>): boolean
-    + tick(timeUnits: int): void
-    + complete(): void
-    + fail(reason: String): void
-    + getStatus(): MissionStatus
-    + getAssignedAgents(): List<Agent>
-}
-
-class ExplorationMission extends Mission {
-    - region: String
-    - requiredBattery: int
-    + validateRequirements(agents: List<Agent>): boolean
-}
-
-class RepairMission extends Mission {
-    - damagedFacility: Facility
-    - damagedEquipment: Equipment
-    + validateRequirements(agents: List<Agent>): boolean
-}
-
-class ResearchMission extends Mission {
-    - targetLab: Laboratory
-    + validateRequirements(agents: List<Agent>): boolean
-}
-
-class RescueMission extends Mission {
-    - targetLocation: String
-    + validateRequirements(agents: List<Agent>): boolean
-}
-
-' --- EMERGENCIES ---
-abstract class Emergency {
-    # emergencyType: EmergencyType
-    # location: String
-    # status: EmergencyStatus
-    # failureReason: String
-    # requiredResources: Map<ResourceType, Integer>
-    # assignedResponders: List<Agent>
-    + {abstract} handle(colony: Colony): boolean
-    + getStatus(): EmergencyStatus
-    + getFailureReason(): String
-}
-
-class OxygenLeakEmergency extends Emergency {
-    - affectedHabitat: Habitat
-    - oxygenLoss: int
-    + handle(colony: Colony): boolean
-}
-
-class FireEmergency extends Emergency {
-    - affectedFacility: Facility
-    + handle(colony: Colony): boolean
-}
-
-class RoverBreakdownEmergency extends Emergency {
-    - damagedRover: ExplorationRover
-    + handle(colony: Colony): boolean
-}
-
-class MedicalEmergency extends Emergency {
-    - patient: Human
-    - treatmentFacility: Facility
-    + handle(colony: Colony): boolean
-}
 
 ' --- RELATIONSHIPS ---
-' Composition (Colony strictly owns PrintManager)
-Colony *-- "1" PrintManager : owns >
+FacilityManager o--- "0..*" Facility : manages via facilityList
+FacilityManager ..> ResourceAllocationPolicy : follows >
+FacilityManager ..> Mission : provides for >
+FacilityManager ..> Emergency : provides for >
 
-' Aggregation (Colony aggregates Agents and Facilities)
-Colony o-- "0..*" Agent : aggregates >
-Colony o-- "1..*" Facility : aggregates >
+Facility o-right- "0..*" Equipment 
+Facility ..> ResourceType 
 
-' Associations
-Colony --> "0..1" Mission : activeMission >
-Colony --> "0..*" Mission : pastMissions >
-Colony --> "0..*" Emergency : pastEmergencies >
-Colony --> "1" Environment : currentCondition >
-
-Facility o-- "0..*" Equipment : houses >
-Mission --> "0..*" Agent : assignedAgents >
-Emergency --> "0..*" Agent : responders >
-
-RepairMission --> "0..1" Facility : targets >
-RepairMission --> "0..1" Equipment : repairs >
-ResearchMission --> "1" Laboratory : conductsIn >
-OxygenLeakEmergency --> "1" Habitat : occursIn >
-FireEmergency --> "1" Facility : damages >
-RoverBreakdownEmergency --> "1" ExplorationRover : stranding >
-MedicalEmergency --> "1" Human : treats >
-MedicalEmergency --> "1" Facility : locatedAt >
+AgentManager o--- "*" Agent
+AgentManager ..> Mission : provides for >
+AgentManager ..> Emergency : provides for >
 
 @enduml
