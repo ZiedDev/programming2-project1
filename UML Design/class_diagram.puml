@@ -8,13 +8,27 @@ skinparam packageStyle rectangle
 top to bottom direction
 
 package "marsops.colony" {
-
+    enum Environment {
+        NORMAL
+        DUST_STORM
+        COMM_DISRUPTION
+    }
     class Colony {
-        - pastEmergencies: List<Emergency>
-        - agentManager: AgentManager
-        - facilityManager: FacilityManager
+        - activeMission: Mission
+        - environment: Environment
+        - pastMissions: List<Mission> {readOnly}
+        - pastEmergencies: List<Emergency> {readOnly}
+        - agentManager: AgentManager {readOnly}
+        - facilityManager: FacilityManager {readOnly}
+        - printManager: PrintManager {readOnly}
+        + submitMission(mission: Mission): boolean
+        - rejectMission(mission: Mission, reason: String): void
+        - addCompletedMission(mission: Mission): void
         + submitEmergency(emergency: Emergency): boolean
         - rejectEmergency(emergency: Emergency, reason: String): void
+        + advanceTime(timeUnit: int): void
+        + getActiveMission(): Mission
+        + getPastMissions(): List<Mission>
         + getPastEmergencies(): List<Emergency>
     }
 
@@ -33,21 +47,25 @@ package "marsops.colony" {
     }
     
     class AgentManager {
-- {static} agents: ArrayList<Agent> {readOnly}
-- {static} agentsCount: Map<Class<? extends Agent>, Integer> {readOnly}
-- register<T : Agent>(agent: T): T
-+ createAgent(type: Class<? extends Human>, originLocation: Facility, name: String, id: String): Human
-+ createAgent(type: Class<? extends Robot>, originLocation: Facility): Robot
-+ addAgent(agent: Agent): void
-+ getAgents(): ArrayList<Agent>
-+ canProvide(mission: Mission): boolean
-+ canProvide(emergency: Emergency): boolean
-+ provide(mission: Mission): ArrayList<Agent>
-+ release(mission: Mission): void
-+ rescue(mission: Mission): void
-+ relocate(agent: Agent, location: Location): void
-+ relocate(agents: ArrayList<Agent>, location: Location): void
-+ advanceTime(timeUnit: int): void
+        - {static} agents: ArrayList<Agent> {readOnly}
+        - {static} agentsCount: Map<Class<? extends Agent>, Integer> {readOnly}
+        - register<T : Agent>(agent: T): T
+        + createAgent(type: Class<? extends Human>, originLocation: Facility, name: String, id: String): Human
+        + createAgent(type: Class<? extends Robot>, originLocation: Facility): Robot
+        + addAgent(agent: Agent): void
+        + getAgents(): ArrayList<Agent>
+        + canProvide(mission: Mission): boolean
+        + canProvide(emergency: Emergency): boolean
+        + provide(mission: Mission): ArrayList<Agent>
+        + release(mission: Mission): void
+        + rescue(mission: Mission): void
+        + relocate(agent: Agent, location: Location): void
+        + relocate(agents: ArrayList<Agent>, location: Location): void
+        + advanceTime(timeUnit: int): void
+    }
+    class PrintManager {
+        + printMissionOutcome(mission: Mission): void
+        + printMissionAndEmergencyOutcomes(): void
     }
 
     FacilityManager -[hidden]right- AgentManager
@@ -264,21 +282,104 @@ package "marsops.emergency" {
 }
 
 
+package "marsops.mission" {
+
+    enum MissionStatus {
+        ASSIGNED
+        IN_PROGRESS
+        COMPLETED
+        FAILED
+        - value: String {readOnly}
+        ~ MissionStatus(value: String)
+        + toString(): String
+    }
+
+    abstract class Mission {
+        - duration: int {readOnly}
+        - elapsed: int
+        # requiredEquipment: int
+        - isCommunicationDependent: boolean
+        - status: MissionStatus
+        # failureReason: String
+        - requiredResources: Map<ResourceType, Integer> {readOnly}
+        # requiredAgents: Map<Class<? extends Agent>, Integer> {readOnly}
+        - assignedAgents: ArrayList<Agent>
+        # targetLocation: Location
+        # targetAgent: Agent
+        + Mission(duration: int)
+        + {abstract} validateRequirements(): boolean
+        + assignAgents(agents: ArrayList<Agent>): void
+        + tick(timeUnits: int): void
+        + complete(): void
+        + fail(reason: String): void
+        + getDuration(): int
+        + getElapsed(): int
+        + getEquipmentCount(): int
+        + isCommunicationDependent(): boolean
+        + setCommunicationDependent(isCommunicationDependent: boolean): void
+        + getStatus(): MissionStatus
+        + setStatus(status: MissionStatus): void
+        + getFailureReason(): String
+        + getTargetLocation(): Location
+        + getTargetAgent(): Agent
+        + getRequiredResources(): Map<ResourceType, Integer>
+        + getRequiredAgents(): Map<Class<? extends Agent>, Integer>
+        + getAssignedAgents(): ArrayList<Agent>
+        + addRequiredResource(type: ResourceType, amount: int): void
+        + addRequiredAgent(type: Class<? extends Agent>, amount: int): void
+        + addRequiredEquipment(amount: int): void
+    }
+
+    together {
+        class ExplorationMission extends Mission {
+            - region: String {readOnly}
+            + ExplorationMission(duration: int, region: String, requiredRoverCount: int, requiredScientistCount: int, requiredBatteryCount: int, requiredEquipmentCount: int, requiredFuel: int, requiredOxygen: int, requiredWater: int, requiredFood: int)
+            + validateRequirements(): boolean
+            + getRegion(): String
+        }
+
+        class RepairMission extends Mission {
+            - damagedFacility: Facility {readOnly}
+            - damagedEquipment: Equipment {readOnly}
+            + RepairMission(duration: int, damagedFacility: Facility, requiredEngineerCount: int, requiredRepairBotCount: int, requiredBatteryCount: int, requiredSparePartsCount: int)
+            + RepairMission(duration: int, damagedEquipment: Equipment, requiredEngineerCount: int, requiredRepairBotCount: int, requiredBatteryCount: int, requiredSparePartsCount: int)
+            + validateRequirements(): boolean
+            + complete(): void
+            + getDamagedFacility(): Facility
+            + getDamagedEquipment(): Equipment
+        }
+
+        class ResearchMission extends Mission {
+            - laboratory: Laboratory {readOnly}
+            + ResearchMission(duration: int, laboratory: Laboratory, requiredScientistCount: int, requiredBatteryCount: int, requiredSparePartsCount: int, requiredEquipmentCount: int)
+            + validateRequirements(): boolean
+            + getLaboratory(): Laboratory
+        }
+
+        class RescueMission extends Mission {
+            - strandedAgent: Agent {readOnly}
+            + RescueMission(duration: int, strandedAgent: Agent, requiredRoverCount: int, requiredMedicalOfficerCount: int, requiredMedicalSuppliesCount: int, requiredFuelCount: int)
+            + RescueMission(duration: int, targetRegion: String, requiredRoverCount: int, requiredMedicalOfficerCount: int, requiredMedicalSuppliesCount: int, requiredFuelCount: int)
+            + validateRequirements(): boolean
+            + getStrandedAgent(): Agent
+        }
+    }
+}
+
 ' --- RELATIONSHIPS ---
 FacilityManager o--- "0..*" Facility : manages via facilityList
 FacilityManager ..> ResourceAllocationPolicy : follows >
-FacilityManager ..> Mission : provides for >
 FacilityManager ..> Emergency : provides for >
 
 Facility o-right- "0..*" Equipment 
 Facility ..> ResourceType 
 
 AgentManager o--- "*" Agent
-AgentManager ..> Mission : provides for >
 AgentManager ..> Emergency : provides for >
 
 Colony *..> AgentManager : coordinates >
 Colony *..> FacilityManager : coordinates >
+Colony *-- "1" PrintManager : prints via >
 Colony o-- "0..*" Emergency : pastEmergencies >
 
 Emergency --> EmergencyStatus : has >
@@ -290,4 +391,23 @@ FireEmergency -->  Laboratory : affects >
 RoverBreakdownEmergency -->  ExplorationRover : affects >
 MedicalEmergency -->  Human : affects >
 MedicalEmergency -->  Facility : resolved at >
+
+
+Colony o-- "0..*" Mission  : contains >
+Colony o-- "1" Environment : environment >
+AgentManager ..> Mission : provides for >
+FacilityManager ..> Mission : provides for >
+
+Mission --> MissionStatus : has status >
+Mission --> Location : has location >
+Mission --> Agent : targets agent >
+Mission o-- "0..*" Agent : assignedAgents >
+Mission ..> ResourceType : requires >
+
+ExplorationMission *-- SurfaceLocation : happens at >
+RepairMission --> Facility : repairs a >
+RepairMission --> Equipment : repairs >
+ResearchMission --> Laboratory : laboratory >
+RescueMission --> Agent : rescues >
+RescueMission *-- SurfaceLocation : occurs at >
 @enduml

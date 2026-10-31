@@ -178,28 +178,26 @@ package "marsops.resource" {
 }
 
 ' --- RELATIONSHIPS ---
-Colony --> "0..1" Mission : activeMission >
-Colony o-- "0..*" Mission : pastMissions >
-Colony --> "1" Environment : environment >
+Colony o-- "0..*" Mission 
+Colony o-- "1" Environment : environment >
 Colony *-- "1" AgentManager : coordinates >
 Colony *-- "1" FacilityManager : coordinates >
 Colony *-- "1" PrintManager : owns >
 
-AgentManager ..> Mission : checks, provides & releases >
-FacilityManager ..> Mission : checks & provides >
-PrintManager ..> Mission : reports outcome >
+AgentManager ..> Mission : provides for >
+FacilityManager ..> Mission : provides for >
 
-Mission --> "0..1" MissionStatus : status >
-Mission --> "0..1" Location : targetLocation >
-Mission --> "0..1" Agent : targetAgent >
+Mission --> MissionStatus : has status >
+Mission --> Location : has location >
+Mission --> Agent : targets agent >
 Mission o-- "0..*" Agent : assignedAgents >
 Mission ..> ResourceType : requires >
 
-ExplorationMission *-- "0..1" SurfaceLocation : creates >
-RepairMission --> "0..1" Facility : damagedFacility >
-RepairMission --> "0..1" Equipment : damagedEquipment >
-ResearchMission --> "1" Laboratory : laboratory >
-RescueMission --> "0..1" Agent : strandedAgent >
-RescueMission *-- "0..1" SurfaceLocation : creates (region mode) >
+ExplorationMission *-- "0..1" SurfaceLocation : happens at >
+RepairMission --> "0..1" Facility : repairs a >
+RepairMission --> "0..1" Equipment : repairs >
+ResearchMission --> "1" Laboratory : occurs at >
+RescueMission --> "0..1" Agent : rescues >
+RescueMission *-- "0..1" SurfaceLocation : occurs at >
 
 @enduml
