@@ -1,16 +1,27 @@
 # Mars Colony Operations Management System
 
-<!-- TODO: table of contents -->
+## Table of Contents
+1. [System Description and Main Components](#1-system-description-and-main-components)
+2. [Design Decisions & Assumptions](#2-design-decisions--assumptions)
+3. [Resource Allocation Rules](#3-resource-allocation-rules)
+4. [Emergency Rules](#4-emergency-rules)
+5. [Environmental Effects](#5-environmental-effects)
+6. [Mission States](#6-mission-states)
+7. [Open Specification Decisions](#7-open-specification-decisions)
+8. [Compilation and Execution](#8-compilation-and-execution)
+9. [Demonstration Scenarios](#9-demonstration-scenarios-mainjava)
+
+---
 
 ## 1. System description and main components
 
-This project aims to model a colony on mars and the components that make it up, including: human crew members, robotic units, different types of facilities aswell as missions and emergencies that interact with them
+This project aims to model a colony on mars and the components that make it up, including: human crew members, robotic units, different types of facilities aswell as missions and emergencies that interact with them.
 
 ### Main Packages
 1. **`marsops.colony`**:
-   - `Colony`: Singleton class that allows fro mission submission, emergency handling, and simulation time advancement.
-   - `AgentManager`: Manages human crew and robotic units, and tracks their availability and assignment to missions.
-   - `FacilityManager`: Manages operational facilities, aggregates colony-wide resource and equipment totals.
+   - `Colony`: Singleton class that allows for mission submission, emergency handling, and simulation time advancement.
+   - `AgentManager`: Manages human crew and robotic units, and tracks their availability, capabilities, and assignment to missions.
+   - `FacilityManager`: Manages operational facilities, aggregates colony-wide resource and equipment totals, and handles deductions.
    - `PrintManager`: Groups all methods relating to printing colony info including: reports, enviroment, agents, past missions and emergencies.
 2. **`marsops.agent`**:
    - `Agent`: Abstract base entity with health, availability, location, and assigned mission tracking.
@@ -22,7 +33,7 @@ This project aims to model a colony on mars and the components that make it up, 
 4. **`marsops.resource`**:
    - `ResourceType`: Enum covering `OXYGEN`, `WATER`, `FOOD`, `FUEL`, `BATTERY`, `SPARE_PARTS`, and `MEDICAL`.
    - `ResourceAllocationPolicy`: Defines the priorities the facilities use for each resource type during deductions.
-   - `Equipment`: Represents individual resource items that independantly have availability.
+   - `Equipment`: Represents individual resource items that independently have availability.
 5. **`marsops.mission`**:
    - `Mission`: Abstract event with a lifecycle with `duration`, `elapsedTime`, requirements, and status.
    - Subtypes: `ExplorationMission`, `ResearchMission`, `RepairMission`, and `RescueMission`.
@@ -49,32 +60,52 @@ This project aims to model a colony on mars and the components that make it up, 
 
 
 1. **Colony-Wide Aggregation**:
-    <!-- TODO: word better -->
-   - When verifying mission or emergency viability, available resources are summed across all currently available facilities.
-   - resources are never partially deducted for a failed submission.
+   - When verifying mission or emergency viability, available resources and equipment are summed across all currently operational facilities (`isAvailable() == true`).
+   - If any required resource or equipment count falls short, the operation is rejected and resources are never partially deducted for a failed submission.
 2. **Deduction Priority (`ResourceAllocationPolicy`)**:
-    - **Oxygen**: `StorageFacility` $\rightarrow$ `Laboratory` $\rightarrow$ `PowerStation` $\rightarrow$ `Habitat` 
-    - **Life Support (Water, Food)**: `StorageFacility` $\rightarrow$ `Habitat` $\rightarrow$ `Laboratory` $\rightarrow$ `PowerStation`.
-    - **Medical Supplies**: `StorageFacility` $\rightarrow$ `Laboratory` $\rightarrow$ `Habitat` $\rightarrow$ `PowerStation`.
-    - **Technical Supplies (Fuel, Battery, Spare Parts, Equipment)**: `StorageFacility` $\rightarrow$ `PowerStation` $\rightarrow$ `Laboratory` $\rightarrow$ `Habitat`.
-3. **Allocation Priority**
-    <!-- TODO: word better -->
-    - facilities have maximum capacity (sum of equipment + resource count)
-    - overwhelming resources than capacity are returned when adding and resources are added according to following priority
-    <!-- TODO: add priorities in same way -->
+   When resources are consumed, operational facilities are depleted in a specific order based on resource criticality:
+   - **Oxygen**: `StorageFacility` $\rightarrow$ `Laboratory` $\rightarrow$ `PowerStation` $\rightarrow$ `Habitat`.
+   - **Life Support (Water, Food)**: `StorageFacility` $\rightarrow$ `Habitat` $\rightarrow$ `Laboratory` $\rightarrow$ `PowerStation`.
+   - **Medical Supplies**: `StorageFacility` $\rightarrow$ `Laboratory` $\rightarrow$ `Habitat` $\rightarrow$ `PowerStation`.
+   - **Technical Supplies (Fuel, Battery, Spare Parts, Equipment)**: `StorageFacility` $\rightarrow$ `PowerStation` $\rightarrow$ `Laboratory` $\rightarrow$ `Habitat`.
+3. **Allocation Priority (Facility Storage)**:
+   - Each facility has a strict maximum capacity: $\text{Total Taken} = \sum \text{Resources} + \text{Equipment Count} \le \text{Capacity}$.
+   - When resources are added via `addResources()`, excess amounts beyond capacity are unallocated and returned.
+   - Facilities fill available space following their internal allocation priority:
+     - **`Habitat`**: `OXYGEN` $\rightarrow$ `WATER` $\rightarrow$ `FOOD` $\rightarrow$ `MEDICAL` $\rightarrow$ `BATTERY` $\rightarrow$ `FUEL` $\rightarrow$ `SPARE_PARTS`
+     - **`Laboratory`**: `BATTERY` $\rightarrow$ `FUEL` $\rightarrow$ `SPARE_PARTS` $\rightarrow$ `OXYGEN` $\rightarrow$ `MEDICAL` $\rightarrow$ `FOOD` $\rightarrow$ `WATER`
+     - **`PowerStation`**: `FUEL` $\rightarrow$ `BATTERY` $\rightarrow$ `SPARE_PARTS` $\rightarrow$ `OXYGEN` $\rightarrow$ `FOOD` $\rightarrow$ `WATER` $\rightarrow$ `MEDICAL`
+     - **`StorageFacility`**: `SPARE_PARTS` $\rightarrow$ `BATTERY` $\rightarrow$ `FUEL` $\rightarrow$ `FOOD` $\rightarrow$ `WATER` $\rightarrow$ `OXYGEN` $\rightarrow$ `MEDICAL`
+
+---
 
 ## 4. Emergency Rules
 
 - Successfully mitigated emergencies immediately transition to `EmergencyStatus.RESOLVED`.
-
 - Insufficient responders or spare parts cause immediate rejection to `EmergencyStatus.UNRESOLVED` with a logged cause.
-
 - All occurrences are archived in `pastEmergencies`.
+- Besides main requirements of the emergency, extra required resources can be added per instance with `addRequiredResource()`.
 
-- besides main requirments of the emergency extra required resources can be added per instance with addrequiredresource
-
-<!-- TODO: List each emergency and its main requirments and event behaviour  -->
-
+### Emergency Types & Requirements
+1. **`OxygenLeakEmergency`**:
+   - **Target**: An operational `Habitat`.
+   - **Immediate Impact**: Immediately deducts `oxygenLoss` from the affected habitat upon creation (clamped at 0).
+   - **Requirements**: Requires at least 1 `Engineer`, 1 `RepairRobot`, and specified `SPARE_PARTS`.
+   - **Failure Effect**: If unresolved, secondary oxygen loss occurs and habitat status remains compromised (`isAvailable = false`).
+2. **`FireEmergency`**:
+   - **Target**: An operational `Laboratory`.
+   - **Immediate Impact**: All available equipment in the affected laboratory are damaged upon creation.
+   - **Requirements**: Requires 1 `Engineer`, specified `WATER`, and `MEDICAL` supplies.
+   - **Failure Effect**: If unresolved, the laboratory is shut down (`isAvailable = false`).
+3. **`MedicalEmergency`**:
+   - **Target**: Injured `Human` patient at an operational treatment `Facility`.
+   - **Requirements**: Requires 1 `MedicalOfficer` and specified `MEDICAL` supplies.
+   - **Resolution Effect**: Patient health is restored to 100 and fatigue reset to 0 upon resolution.
+4. **`RoverBreakdownEmergency`**:
+   - **Target**: A damaged `ExplorationRover`.
+   - **Immediate Impact**: Rover health set to 0 and marked unavailable.
+   - **Requirements**: Requires 1 `Engineer`, 1 `RepairRobot`, and specified `SPARE_PARTS`.
+   - **Resolution Effect**: Rover health restored to 100, battery restored to 100, and marked available again.
 
 ---
 
@@ -97,7 +128,7 @@ Missions transition through states defined by `MissionStatus`:
 
 ```
    Created -> Checked 
-        -> [FAILED] if invalid or enviroment hazard or missing agents/resources
+        -> [FAILED] if invalid or environment hazard or missing agents/resources
         -> [ASSIGNED] if passed
             -> [FAILED] Environmental hazard / internal failure
             -> [IN_PROGRESS] advanceTime() under safe conditions
@@ -141,9 +172,7 @@ java marsops.Main
 
 ## 9. Demonstration Scenarios (`Main.java`)
 
-`marsops.Main` automates and validates the five required scenarios:
-
-    <!-- TODO:  almost perfect but remove instance names like "shibuya" + add here that in code we use setup colony to not redeclare alot of stuff-->
+`marsops.Main` automates and validates the five required scenarios. In code, a shared helper method `setupColony()` initializes common baseline facilities (a Habitat and Storage Facility), resources, crew members, and robots to keep test setups concise and avoid boilerplate:
 
 1. **Scenario 1: Successful Exploration**
    - Configures a colony with a Scientist, Exploration Rover, Habitat, and Storage Facility.
@@ -156,7 +185,7 @@ java marsops.Main
    - Submits a mission requesting 99,999 units of fuel.
    - Verifies rejection without partial consumption or negative balances.
 4. **Scenario 4: Emergency Handling (Oxygen Leak)**
-   - Simulates an oxygen leak in Habitat `"Shibuya"`.
+   - Simulates an oxygen leak in a Habitat.
    - Locates habitat, identifies Engineer and RepairRobot responders, consumes spare parts, and marks status `RESOLVED`.
 5. **Scenario 5: Environmental Effect (Dust Storm)**
    - Sets environment to `DUST_STORM`.

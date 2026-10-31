@@ -47,5 +47,6 @@ public class OxygenLeakEmergency extends Emergency {
     public void fail(String reason) {
         super.fail(reason);
         applyOxygenLoss();
+        affectedHabitat.setAvailability(false);
     }
 }
