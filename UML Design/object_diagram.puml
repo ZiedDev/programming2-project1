@@ -1,70 +1,169 @@
-@startuml MARS_OPS_Object_Diagram
-skinparam objectAttributeIconSize 0
+@startuml MarsOps_Object_Diagram
+
 skinparam monochrome false
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam linetype ortho
+skinparam defaultFontName "Segoe UI", Arial, sans-serif
+skinparam objectFontSize 11
+skinparam objectFontStyle bold
+skinparam arrowFontSize 10
+skinparam arrowThickness 1.2
+skinparam arrowColor #37474F
 
-title MARS-OPS Object Diagram (Pre-Exploration Mission Snapshot)
+title MARS-OPS Object Diagram - System Snapshot\n(State: Immediately Before Exploration Mission Execution, Following Resolved Oxygen Leak)
 
-object "aresColony : Colony" as colony {
-    environment = NORMAL
-    activeMission = chryseSurvey
+legend top left
+  <b>Snapshot Context & Timing:</b>
+  • <b>Colony State:</b> Operational, NORMAL Mars environment.
+  • <b>Preceding Event:</b> OxygenLeakEmergency in Habitat was successfully RESOLVED by Engineer & RepairRobot.
+  • <b>Current Event:</b> ExplorationMission submitted & accepted (status = ASSIGNED, elapsed = 0 / duration = 2).
+  • <b>Resource & Agent Allocation:</b> Required resources (battery, fuel, O2, water, food) & equipment allocated.
+  • <b>Agent Deployment:</b> Assigned agents (rover1, scientist1) relocated to target SurfaceLocation; marked unavailable.
+endlegend
+
+package "Colony Management Tier" #ECEFF1 {
+    object "colony : Colony" as colony #CFD8DC {
+        environment = Environment.NORMAL
+        activeMission = mission1
+        pastMissions = []
+        pastEmergencies = [leak1]
+    }
+
+    object "agentMgr : AgentManager" as agentMgr #ECEFF1 {
+        agents = [scientist1, engineer1, rover1, repairBot1]
+        groupedAgents = 4 agent classes registered
+    }
+
+    object "facilityMgr : FacilityManager" as facilityMgr #ECEFF1 {
+        facilityList = [habitat1, storage1]
+    }
+
+    object "printMgr : PrintManager" as printMgr #ECEFF1
 }
 
-object "printMgr : PrintManager" as pm {
+package "Active Mission & Target Location" #FFF9C4 {
+    object "mission1 : ExplorationMission" as mission1 #FFF59D {
+        region = "mars surface"
+        duration = 2
+        elapsed = 0
+        status = MissionStatus.ASSIGNED
+        failureReason = ""
+        isCommunicationDependent = false
+        requiredEquipment = 1
+        requiredAgents = {ExplorationRover: 1, Scientist: 1}
+        requiredResources = {BATTERY: 10, FUEL: 10, OXYGEN: 10, WATER: 5, FOOD: 5}
+    }
+
+    object "surfaceLoc1 : SurfaceLocation" as surfaceLoc1 #FFFDE7 {
+        location = "mars surface"
+    }
 }
 
-object "alphaHabitat : Habitat" as hab {
-    location = "Sector 1"
-    capacity = 10
-    isOperational = true
-    resources = {OXYGEN: 200, SPARE_PARTS: 5}
+package "Colony Facilities & Equipment" #E8F5E9 {
+    object "habitat1 : Habitat" as habitat1 #C8E6C9 {
+        id = 1
+        location = "Shibuya Sector A"
+        capacity = 500
+        totalTakenCapacity = 320
+        isAvailable = true
+        resourceAmount = {OXYGEN: 100, WATER: 100, FOOD: 100, MEDICAL: 20}
+        equipmentList = [equipment1]
+    }
+
+    object "storage1 : StorageFacility" as storage1 #C8E6C9 {
+        id = 2
+        location = "Smouha Sector B"
+        capacity = 500
+        totalTakenCapacity = 250
+        isAvailable = true
+        resourceAmount = {BATTERY: 100, FUEL: 100, SPARE_PARTS: 50}
+    }
+
+    object "equipment1 : Equipment" as equipment1 #DCEDC8 {
+        id = 1
+        isDamaged = false
+    }
 }
 
-object "mainDepot : StorageFacility" as storage {
-    location = "Sector 2"
-    capacity = 100
-    isOperational = true
-    resources = {OXYGEN: 300, BATTERY: 50, SPARE_PARTS: 10}
+package "Human Crew Personnel" #FFE0B2 {
+    object "scientist1 : Scientist" as scientist1 #FFCC80 {
+        name = "Hesham"
+        id = "10062"
+        health = 100
+        fatigue = 0
+        isAvailable = false
+    }
+
+    object "engineer1 : Engineer" as engineer1 #FFE0B2 {
+        name = "Hossam"
+        id = "10010"
+        health = 100
+        fatigue = 0
+        isAvailable = true
+    }
 }
 
-object "drAlice : Scientist" as alice {
-    name = "Dr. Alice"
-    id = "S-101"
-    currentLocation = "Sector 1"
-    isAvailable = false
-    health = 100
-    fatigue = 0
-    skills = ["Geology", "Astrobiology"]
+package "Autonomous Robotic Units" #E0F7FA {
+    object "rover1 : ExplorationRover" as rover1 #80DEEA {
+        batteryLevel = 100
+        health = 100
+        isAvailable = false
+    }
+
+    object "repairBot1 : RepairRobot" as repairBot1 #B2EBF2 {
+        batteryLevel = 100
+        health = 100
+        isAvailable = true
+    }
 }
 
-object "curiosity2 : ExplorationRover" as rover {
-    name = "Curiosity-2"
-    id = "R-01"
-    currentLocation = "Mars Surface - Chryse Planitia"
-    isAvailable = false
-    health = 100
-    batteryLevel = 80
+package "Past Resolved Emergencies" #FFEBEE {
+    object "leak1 : OxygenLeakEmergency" as leak1 #FFCDD2 {
+        status = EmergencyStatus.RESOLVED
+        failureReason = ""
+        oxygenLoss = 50
+        requiredAgents = {Engineer: 1, RepairRobot: 1}
+        requiredResources = {SPARE_PARTS: 2}
+    }
 }
 
-object "chryseSurvey : ExplorationMission" as mission {
-    region = "Chryse Planitia"
-    duration = 2
-    elapsed = 0
-    isCommunicationDependent = false
-    status = ASSIGNED
-    failureReason = ""
-    requiredResources = {BATTERY: 10}
-}
+' --- Structural Links within Colony Management ---
+colony -- agentMgr : agentManager
+colony -- facilityMgr : facilityManager
+colony -- printMgr : printManager
 
-' --- LINKS ---
-colony *-- pm : owns
-colony o-- hab : contains
-colony o-- storage : contains
-colony o-- alice : manages
-colony o-- rover : manages
+' --- Mission Links ---
+colony -- mission1 : activeMission
+mission1 -- surfaceLoc1 : targetLocation
+mission1 -- rover1 : assignedAgents[0]
+mission1 -- scientist1 : assignedAgents[1]
 
-colony --> mission : activeMission
+' --- Agent State Links ---
+rover1 -- mission1 : assignedMission
+scientist1 -- mission1 : assignedMission
+rover1 -- surfaceLoc1 : currentLocation
+scientist1 -- surfaceLoc1 : currentLocation
+rover1 -- habitat1 : originLocation
+scientist1 -- habitat1 : originLocation
 
-mission --> alice : assignedAgents
-mission --> rover : assignedAgents
+engineer1 -- habitat1 : originLocation & currentLocation
+repairBot1 -- storage1 : originLocation & currentLocation
+
+' --- Facility & Equipment Links ---
+facilityMgr -- habitat1 : facilityList[0]
+facilityMgr -- storage1 : facilityList[1]
+storage1 -- equipment1 : equipmentList[0]
+equipment1 -- storage1 : location
+
+' --- AgentManager Registry Links ---
+agentMgr -- scientist1 : agents[0]
+agentMgr -- engineer1 : agents[1]
+agentMgr -- rover1 : agents[2]
+agentMgr -- repairBot1 : agents[3]
+
+' --- Emergency Links ---
+colony -- leak1 : pastEmergencies[0]
+leak1 -- habitat1 : affectedHabitat & location
 
 @enduml
