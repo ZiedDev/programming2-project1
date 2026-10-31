@@ -1,0 +1,59 @@
+@startuml MARS_OPS_Use_Case_Diagram
+skinparam monochrome false
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+skinparam usecase {
+    BackgroundColor #EDF2F7
+    BorderColor #2B6CB0
+    ArrowColor #2D3748
+}
+
+left to right direction
+
+actor "Colony Administrator" as Admin
+
+rectangle "MARS-OPS Colony System" {
+
+    ' Setup & Colony Management
+    usecase "Manage Personnel & Robots\n(createAgent, addAgent)" as UC_Agents
+    usecase "Manage Facilities & Equipment\n(addFacility, getFacilities)" as UC_Facilities
+
+    ' Operations & Lifecycle
+    usecase "Submit Mission" as UC_SubmitMission
+    usecase "Submit Emergency" as UC_SubmitEmergency
+    usecase "Advance Simulation Time" as UC_AdvanceTime
+
+    ' Sub-operations (included during mission / emergency lifecycle)
+    usecase "Validate & Allocate Resources" as UC_AllocResources
+    usecase "Validate & Assign Responders" as UC_AssignResponders
+    usecase "Update Mission Progress & Status" as UC_TrackMission
+
+    ' Monitoring & Reporting
+    usecase "Monitor Colony Status Reports" as UC_Report
+    usecase "Inspect Mission & Emergency Outcomes" as UC_Outcomes
+    usecase "Monitor & Set Environment" as UC_Env
+
+    ' Primary Admin Interactions
+    Admin --> UC_Agents
+    Admin --> UC_Facilities
+    Admin --> UC_SubmitMission
+    Admin --> UC_SubmitEmergency
+    Admin --> UC_AdvanceTime
+    Admin --> UC_Report
+    Admin --> UC_Outcomes
+    Admin --> UC_Env
+
+    ' Clear <<include>> relationships: what the code ALWAYS runs when executing the use case
+    UC_SubmitMission .> UC_AllocResources : <<include>>
+    UC_SubmitMission .> UC_AssignResponders : <<include>>
+    
+    UC_SubmitEmergency .> UC_AllocResources : <<include>>
+    UC_SubmitEmergency .> UC_AssignResponders : <<include>>
+
+    ' Clear <<extend>> relationship: time advance conditionally ticks active missions
+    UC_AdvanceTime <. UC_TrackMission : <<extend>>\n(if active mission)
+}
+
+@enduml
