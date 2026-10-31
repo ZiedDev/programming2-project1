@@ -2,7 +2,7 @@
 
 ## Table of Contents
 1. [System Description and Main Components](#1-system-description-and-main-components)
-2. [Design Decisions & Assumptions](#2-design-decisions--assumptions)
+2. [Design Decisions and Assumptions](#2-design-decisions--assumptions)
 3. [Resource Allocation Rules](#3-resource-allocation-rules)
 4. [Emergency Rules](#4-emergency-rules)
 5. [Environmental Effects](#5-environmental-effects)
@@ -39,25 +39,26 @@ This project aims to model a colony on mars and the components that make it up, 
    - Subtypes: `ExplorationMission`, `ResearchMission`, `RepairMission`, and `RescueMission`.
    - `MissionStatus`: Enum (`ASSIGNED`, `IN_PROGRESS`, `COMPLETED`, `FAILED`).
 6. **`marsops.emergency`**:
-   - `Emergency`: Abstract event with requirments.
+   - `Emergency`: Abstract crisis event with requirements and validation.
    - Subtypes: `OxygenLeakEmergency`, `FireEmergency`, `MedicalEmergency`, and `RoverBreakdownEmergency`.
    - `EmergencyStatus`: Enum (`RESOLVED`, `UNRESOLVED`).
 
 ---
 
-## 2. Design Decisions & Assumptions
+## 2. Design Decisions and Assumptions
 
-1. Colony Singleton
-2. Relocation & Origin Return + health check
-3. Immediate Emergency Resolution
-4. Equipment are not resources and are individual with availability
-5. Agents wear down over time | Human fatigue increases per tick; robot battery drains per tick. Exhausted or depleted agents cannot start new missions.
-...
+1. **Colony Singleton**: Kept as a single instance so there is one central access point for managers and colony state (`activeMission`, `environment`). We also have `resetInstance()` to easily clear state and reset IDs between test runs.
+2. **Single Active Mission**: Only one mission can be active at a time. Trying to submit another while one is running gets rejected right away.
+3. **All-or-Nothing Checks**: Before any mission or emergency is accepted, the system checks that agents, resources, and environmental conditions are valid. If anything fails, nothing is deducted and no agents are locked.
+4. **Relocation and Origin Return**: When agents go on a mission, their location updates to the target location. Once it finishes (or fails), agents that are still alive (`health > 0`) get returned back to their `originLocation` and become available again.
+5. **Immediate Emergency Handling**: Emergencies are treated as immediate crisis events. `submitEmergency()` validates responders and resources, deducts what is needed, and resolves it on the spot.
+6. **Equipment as Distinct Objects**: Equipment items are treated as separate objects with their own availability and health, not simple numeric resources. They still take up facility capacity.
+7. **Agent Fatigue and Battery**: Agents wear down over time. Human fatigue goes up per tick, and robot battery drains per tick. If a human is exhausted (fatigue $\ge 100$) or a robot is out of battery ($\le 0$), they cannot be assigned to new tasks.
+8. **Manager Separation**: Delegated specific jobs to dedicated managers (`AgentManager` handles crew/robots, `FacilityManager` handles facilities/resources, and `PrintManager` handles all console output).
 
-<!-- TODO: complete list and format -->
+---
 
 ## 3. Resource Allocation Rules
-
 
 1. **Colony-Wide Aggregation**:
    - When verifying mission or emergency viability, available resources and equipment are summed across all currently operational facilities (`isAvailable() == true`).
@@ -86,7 +87,7 @@ This project aims to model a colony on mars and the components that make it up, 
 - All occurrences are archived in `pastEmergencies`.
 - Besides main requirements of the emergency, extra required resources can be added per instance with `addRequiredResource()`.
 
-### Emergency Types & Requirements
+### Emergency Types and Requirements
 1. **`OxygenLeakEmergency`**:
    - **Target**: An operational `Habitat`.
    - **Immediate Impact**: Immediately deducts `oxygenLoss` from the affected habitat upon creation (clamped at 0).
@@ -145,10 +146,18 @@ Missions transition through states defined by `MissionStatus`:
 
 ## 7. Open Specification Decisions
 
-    <!-- TODO:  is this even neccesary isnt htis literally Design Decisions & Assumptions???-->
+The project spec left a few areas open to interpretation, so here is how we chose to handle them:
+
+1. **Colony Facade vs Direct Access**:
+   - `Colony` acts as the main facade delegating agent and facility work. But for printing, we expose `colony.getPrintManager()` directly since print methods do not change state and are cleaner to call this way.
+2. **Facility Storage vs Deduction Priorities**:
+   - We used separate priority orders for adding resources (`prioToAllocate` per facility) vs deducting resources (`ResourceAllocationPolicy`). This protects critical life support in habitats during missions, while letting storage facilities handle the bulk of operational deductions.
+3. **Emergency Handling Model**:
+   - Emergencies are resolved right on submission. In a real base crisis you want immediate response, so `submitEmergency()` checks responders, deducts parts, and resolves the issue immediately instead of waiting across multiple time ticks.
+4. **Agent Return After Missions**:
+   - Every agent keeps track of an `originLocation` (like their home habitat). Once a mission ends or fails, agents return to their base rather than being left stranded at the mission site.
 
 ---
-
 
 ## 8. Compilation and Execution
 
