@@ -53,7 +53,7 @@ This project aims to model a colony on mars and the components that make it up, 
 4. **Relocation and Origin Return**: When agents go on a mission, their location updates to the target location. Once it finishes (or fails), agents that are still alive (`health > 0`) get returned back to their `originLocation` and become available again.
 5. **Immediate Emergency Handling**: Emergencies are treated as immediate crisis events. `submitEmergency()` validates responders and resources, deducts what is needed, and resolves it on the spot.
 6. **Equipment as Distinct Objects**: Equipment items are treated as separate objects with their own availability and health, not simple numeric resources. They still take up facility capacity.
-7. **Agent Fatigue and Battery**: Agents wear down over time. Human fatigue goes up per tick, and robot battery drains per tick. If a human is exhausted (fatigue $\ge 100$) or a robot is out of battery ($\le 0$), they cannot be assigned to new tasks.
+7. **Agent Fatigue and Battery**: Agents wear down over time. Human fatigue goes up per tick, and robot battery drains per tick. If a human is exhausted (fatigue >= 100) or a robot is out of battery (<= 0), they cannot be assigned to new tasks.
 8. **Manager Separation**: Delegated specific jobs to dedicated managers (`AgentManager` handles crew/robots, `FacilityManager` handles facilities/resources, and `PrintManager` handles all console output).
 
 ---
@@ -65,18 +65,18 @@ This project aims to model a colony on mars and the components that make it up, 
    - If any required resource or equipment count falls short, the operation is rejected and resources are never partially deducted for a failed submission.
 2. **Deduction Priority (`ResourceAllocationPolicy`)**:
    When resources are consumed, operational facilities are depleted in a specific order based on resource criticality:
-   - **Oxygen**: `StorageFacility` $\rightarrow$ `Laboratory` $\rightarrow$ `PowerStation` $\rightarrow$ `Habitat`.
-   - **Life Support (Water, Food)**: `StorageFacility` $\rightarrow$ `Habitat` $\rightarrow$ `Laboratory` $\rightarrow$ `PowerStation`.
-   - **Medical Supplies**: `StorageFacility` $\rightarrow$ `Laboratory` $\rightarrow$ `Habitat` $\rightarrow$ `PowerStation`.
-   - **Technical Supplies (Fuel, Battery, Spare Parts, Equipment)**: `StorageFacility` $\rightarrow$ `PowerStation` $\rightarrow$ `Laboratory` $\rightarrow$ `Habitat`.
+   - **Oxygen**: `StorageFacility` -> `Laboratory` -> `PowerStation` -> `Habitat`.
+   - **Life Support (Water, Food)**: `StorageFacility` -> `Habitat` -> `Laboratory` -> `PowerStation`.
+   - **Medical Supplies**: `StorageFacility` -> `Laboratory` -> `Habitat` -> `PowerStation`.
+   - **Technical Supplies (Fuel, Battery, Spare Parts, Equipment)**: `StorageFacility` -> `PowerStation` -> `Laboratory` -> `Habitat`.
 3. **Allocation Priority (Facility Storage)**:
-   - Each facility has a strict maximum capacity: $\text{Total Taken} = \sum \text{Resources} + \text{Equipment Count} \le \text{Capacity}$.
+   - Each facility has a strict maximum capacity: Total Taken = Sum of Resources + Equipment Count <= Capacity.
    - When resources are added via `addResources()`, excess amounts beyond capacity are unallocated and returned.
    - Facilities fill available space following their internal allocation priority:
-     - **`Habitat`**: `OXYGEN` $\rightarrow$ `WATER` $\rightarrow$ `FOOD` $\rightarrow$ `MEDICAL` $\rightarrow$ `BATTERY` $\rightarrow$ `FUEL` $\rightarrow$ `SPARE_PARTS`
-     - **`Laboratory`**: `BATTERY` $\rightarrow$ `FUEL` $\rightarrow$ `SPARE_PARTS` $\rightarrow$ `OXYGEN` $\rightarrow$ `MEDICAL` $\rightarrow$ `FOOD` $\rightarrow$ `WATER`
-     - **`PowerStation`**: `FUEL` $\rightarrow$ `BATTERY` $\rightarrow$ `SPARE_PARTS` $\rightarrow$ `OXYGEN` $\rightarrow$ `FOOD` $\rightarrow$ `WATER` $\rightarrow$ `MEDICAL`
-     - **`StorageFacility`**: `SPARE_PARTS` $\rightarrow$ `BATTERY` $\rightarrow$ `FUEL` $\rightarrow$ `FOOD` $\rightarrow$ `WATER` $\rightarrow$ `OXYGEN` $\rightarrow$ `MEDICAL`
+     - **`Habitat`**: `OXYGEN` -> `WATER` -> `FOOD` -> `MEDICAL` -> `BATTERY` -> `FUEL` -> `SPARE_PARTS`
+     - **`Laboratory`**: `BATTERY` -> `FUEL` -> `SPARE_PARTS` -> `OXYGEN` -> `MEDICAL` -> `FOOD` -> `WATER`
+     - **`PowerStation`**: `FUEL` -> `BATTERY` -> `SPARE_PARTS` -> `OXYGEN` -> `FOOD` -> `WATER` -> `MEDICAL`
+     - **`StorageFacility`**: `SPARE_PARTS` -> `BATTERY` -> `FUEL` -> `FOOD` -> `WATER` -> `OXYGEN` -> `MEDICAL`
 
 ---
 
