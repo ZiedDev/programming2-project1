@@ -179,7 +179,7 @@ public class AgentManager {
         ArrayList<Agent> assignedAgents = mission.getAssignedAgents();
 
         for (Agent agent : assignedAgents) {
-            agent.setAvailable(true);
+            agent.setAssignedMission(null);
             if (agent.getHealth() > 0) {
                 agent.setAvailable(true);
                 relocate(agent, agent.getOriginLocation());
