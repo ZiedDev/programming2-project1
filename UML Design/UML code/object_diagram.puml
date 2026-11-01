@@ -15,11 +15,8 @@ title MARS-OPS Object Diagram - System Snapshot\n(State: Immediately Before Expl
 
 legend top left
   <b>Snapshot Context & Timing:</b>
-  • <b>Colony State:</b> Operational, NORMAL Mars environment.
-  • <b>Preceding Event:</b> OxygenLeakEmergency in Habitat was successfully RESOLVED by Engineer & RepairRobot.
-  • <b>Current Event:</b> ExplorationMission submitted & accepted (status = ASSIGNED, elapsed = 0 / duration = 2).
-  • <b>Resource & Agent Allocation:</b> Required resources (battery, fuel, O2, water, food) & equipment allocated.
-  • <b>Agent Deployment:</b> Assigned agents (rover1, scientist1) relocated to target SurfaceLocation; marked unavailable.
+  • <b>Preceding Event:</b> oxygenLeakEmergency resolved by engineer and repairRboot, explorationMission just got accepted and assigned a scientist and a repairbot (elapsed 0 time) and required resources and equipment allocated.
+  • <b>agents:</b> rover1 and scientist1 assigned to a mission.
 endlegend
 
 package "Colony Management Tier" #ECEFF1 {
@@ -64,23 +61,23 @@ package "Colony Facilities & Equipment" #E8F5E9 {
     object "habitat1 : Habitat" as habitat1 #C8E6C9 {
         id = 1
         location = "Shibuya Sector A"
-        capacity = 500
-        totalTakenCapacity = 320
+        capacity = 400
+        totalTakenCapacity = 330
         isAvailable = true
-        resourceAmount = {OXYGEN: 100, WATER: 100, FOOD: 100, MEDICAL: 20}
-        equipmentList = [equipment1]
+        resourceAmount = {OXYGEN: 40, WATER: 95, FOOD: 95, MEDICAL: 100}
+        equipmentList = [equipment2]
     }
 
     object "storage1 : StorageFacility" as storage1 #C8E6C9 {
         id = 2
         location = "Smouha Sector B"
-        capacity = 500
-        totalTakenCapacity = 250
+        capacity = 300
+        totalTakenCapacity = 280
         isAvailable = true
-        resourceAmount = {BATTERY: 100, FUEL: 100, SPARE_PARTS: 50}
+        resourceAmount = {BATTERY: 90, FUEL: 90, SPARE_PARTS: 100}
     }
 
-    object "equipment1 : Equipment" as equipment1 #DCEDC8 {
+    object "equipment2 : Equipment" as equipment2 #DCEDC8 {
         id = 1
         isDamaged = false
     }
@@ -125,6 +122,7 @@ package "Past Resolved Emergencies" #FFEBEE {
         oxygenLoss = 50
         requiredAgents = {Engineer: 1, RepairRobot: 1}
         requiredResources = {SPARE_PARTS: 2}
+        affectedHabitat = habitat1
     }
 }
 
@@ -153,8 +151,8 @@ repairBot1 -- storage1 : originLocation & currentLocation
 ' --- Facility & Equipment Links ---
 facilityMgr -- habitat1 : facilityList[0]
 facilityMgr -- storage1 : facilityList[1]
-storage1 -- equipment1 : equipmentList[0]
-equipment1 -- storage1 : location
+storage1 -- equipment2 : equipmentList[0]
+equipment2 -- storage1 : location
 
 ' --- AgentManager Registry Links ---
 agentMgr -- scientist1 : agents[0]
